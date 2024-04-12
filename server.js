@@ -6,6 +6,8 @@ fastify.register(require("@fastify/static"), {
   prefix: "/",
 });
 
+
+
 fastify.register(require("@fastify/formbody"));
 fastify.register(require("@fastify/view"), {
   engine: {
