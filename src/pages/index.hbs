@@ -29,39 +29,40 @@
     </a-scene>
 
     <script>
-        document.querySelector('a-scene').addEventListener('loaded', function () {
-            var button = document.getElementById('startButton');
-            button.style.display = 'block'; // Show the button
-            button.disabled = false; // Enable the button
-            button.addEventListener('click', function () {
-                loadDrones();
-            });
+    document.querySelector('a-scene').addEventListener('loaded', function () {
+        var button = document.getElementById('startButton');
+        button.style.display = 'block'; // Show the button
+        button.disabled = false; // Enable the button
+        button.addEventListener('click', function () {
+            loadDrones();
         });
+    });
 
-        function loadDrones() {
-            var sceneEl = document.querySelector('a-scene');
-            var radius = 10; // Radius of the circle
-            var y = 1.6;   // Height of the audio sources
-            for (let i = 2; i <= 10; i++) {
-                setTimeout(function () {
-                    let angle = (i / 10) * Math.PI * 2;
-                    let x = Math.cos(angle) * radius;
-                    let z = Math.sin(angle) * radius;
-                    let audioId = `drone${i}`;
-                    let audioSrc = `https://road-excessive-belief.glitch.me/audio/0000${String(i).padStart(2, '0')}drone.ogg`;
-                    let audioEl = document.createElement('audio');
-                    audioEl.setAttribute('id', audioId);
-                    audioEl.setAttribute('src', audioSrc);
-                    audioEl.setAttribute('crossorigin', 'anonymous');
-                    document.body.appendChild(audioEl);
+    function loadDrones() {
+        var sceneEl = document.querySelector('a-scene');
+        var radius = 10; // Radius of the circle
+        var y = 1.6;   // Height of the audio sources
+        for (let i = 2; i <= 10; i++) {
+            setTimeout(function () {
+                let angle = (i / 10) * Math.PI * 2;
+                let x = Math.cos(angle) * radius;
+                let z = Math.sin(angle) * radius;
+                let audioId = `drone${i}`;
+                let audioSrc = `/audio/0000${String(i).padStart(2, '0')}drone.ogg`; // Adjusted to local path
+                let audioEl = document.createElement('audio');
+                audioEl.setAttribute('id', audioId);
+                audioEl.setAttribute('src', audioSrc);
+                audioEl.setAttribute('crossorigin', 'anonymous');
+                document.body.appendChild(audioEl);
 
-                    let entityEl = document.createElement('a-entity');
-                    entityEl.setAttribute('position', `${x} ${y} ${z}`);
-                    entityEl.setAttribute('sound', `src: #${audioId}; rolloffFactor: 1.5; refDistance: 1; maxDistance: 50;`);
-                    sceneEl.appendChild(entityEl);
-                }, i * 1000); // Delay loading each subsequent file to reduce load
-            }
+                let entityEl = document.createElement('a-entity');
+                entityEl.setAttribute('position', `${x} ${y} ${z}`);
+                entityEl.setAttribute('sound', `src: #${audioId}; rolloffFactor: 1.5; refDistance: 1; maxDistance: 50;`);
+                sceneEl.appendChild(entityEl);
+            }, i * 1000); // Delay loading each subsequent file to reduce load
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
