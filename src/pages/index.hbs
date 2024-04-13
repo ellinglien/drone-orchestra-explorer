@@ -24,7 +24,7 @@
     schema: {
         speed: {type: 'number', default: 10},
         acceleration: {type: 'number', default: 50},
-        easing: {type: 'number', default: 0.1}, // This controls the 'inertia' or 'momentum'
+        easing: {type: 'number', default: 0.5}, // This controls the 'inertia' or 'momentum'
         friction: {type: 'number', default: 0.05} // Friction to slowly stop the movement
     },
     init: function() {
@@ -88,7 +88,7 @@
                <audio id="drone10" src="/audio/00010drone.ogg" preload="metadata"></audio>
     </a-assets>
         <!-- Camera with enhanced movement controls -->
-<a-entity camera look-controls="pointerLockEnabled: true" flight-controls="speed: 7; acceleration: 5; easing: 5" position="0 1.6 0" smooth-look-controls="dampingFactor: 0.5"></a-entity>
+<a-entity camera look-controls="pointerLockEnabled: true" flight-controls="speed: 7; acceleration: 5; easing: 9" position="0 1.6 0" smooth-look-controls="dampingFactor: 1"></a-entity>
 
 <!-- Example Cube -->
     <a-box id="targetCube" position="0 0 -5" depth="1" height="0" width="0" color="none"></a-box>
@@ -138,7 +138,7 @@ const numberOfEntities = 10;
         polyhedronEl.setAttribute('rotation', `${initialRotation.x} ${initialRotation.y} ${initialRotation.z}`);
 
         let scaleMin = 0.8 + Math.random() * 0.7;
-        let scaleMax = 1.0 + Math.random();
+        let scaleMax = 2.0 + Math.random();
         let duration = 20000 + Math.random() * 4000;
         let delay = i === randomImmediateIndex ? 0 : Math.random() * 100000 + 1000; // Immediate for the selected index, random delay for others
 
@@ -157,7 +157,7 @@ const numberOfEntities = 10;
 
 AFRAME.registerComponent('smooth-look-controls', {
     schema: {
-      dampingFactor: { type: 'number', default: 0.02 },
+      dampingFactor: { type: 'number', default: 0.5 },
       decayFactor: { type: 'number', default: 0.95 } // Control how quickly to reduce follow-through
     },
     init: function () {
