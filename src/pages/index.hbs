@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>DRONE ORCHESTRA CONCERT</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!-- Include A-Frame Extras for enhanced movement controls -->
+    <script src="https://unpkg.com/aframe-extras@6/dist/aframe-extras.min.js"></script>
     <style>
         #startButton {
             position: absolute;
@@ -33,47 +35,45 @@
             <audio id="drone9" src="/audio/00009drone.ogg" preload="metadata"></audio>
                <audio id="drone10" src="/audio/00010drone.ogg" preload="metadata"></audio>
       </a-assets>
-        <a-entity camera look-controls wasd-controls="acceleration: 5; easing: 20" position="0 1.6 0"></a-entity>
+        <!-- Camera with enhanced movement controls -->
+        <a-entity camera wasd-controls look-controls position="0 1.6 0"></a-entity>
     </a-scene>
 
     <script>
-    document.getElementById('startButton').addEventListener('click', function () {
-        var sceneEl = document.querySelector('a-scene');
-        var radius = 3; // Base radius for audio source placement
-        var y = 1.6;    // Height of the audio sources
+        document.getElementById('startButton').addEventListener('click', function () {
+            var sceneEl = document.querySelector('a-scene');
+            for (let i = 1; i <= 10; i++) {
+                // Calculate spherical coordinates for each drone
+                let phi = Math.acos(2 * (i / 10) - 1) - Math.PI / 2;
+                let theta = Math.sqrt(10 * Math.PI) * phi;
+                let x = Math.cos(theta) * Math.cos(phi) * 3;
+                let y = Math.sin(phi) * 3;
+                let z = Math.sin(theta) * Math.cos(phi) * 3;
+                let audioId = `drone${i}`;
 
-        for (let i = 1; i <= 10; i++) {
-            let angle = (i / 10) * Math.PI * 2; // Base angle for even distribution
-            let randomOffset = Math.random() * 1.5 - 0.25; // Random offset between -0.25 and 0.25
-            let adjustedRadius = radius + randomOffset; // Adjust radius randomly
-            let x = Math.cos(angle) * adjustedRadius;
-            let z = Math.sin(angle) * adjustedRadius;
-            let audioId = `drone${i}`;
+                let audioEl = document.getElementById(audioId);
+                if (!audioEl.src) {
+                    audioEl.src = `/audio/0000${i.toString().padStart(2, '0')}drone.ogg`;
+                    audioEl.load();
+                }
 
-            let audioEl = document.getElementById(audioId);
-            if (!audioEl.src) {
-                audioEl.src = `/audio/0000${i.toString().padStart(2, '0')}drone.ogg`; // Ensure audio elements are sourced
-                audioEl.load();
+                let entityEl = document.createElement('a-entity');
+                entityEl.setAttribute('position', `${x} ${y} ${z}`);
+                entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
+
+                let boxEl = document.createElement('a-box');
+                boxEl.setAttribute('position', '0 0 0');
+                boxEl.setAttribute('color', 'white');
+                boxEl.setAttribute('opacity', '0.5');
+                boxEl.setAttribute('material', 'wireframe: true');
+                boxEl.setAttribute('depth', '0.5');
+                boxEl.setAttribute('height', '0.5');
+                boxEl.setAttribute('width', '0.5');
+                entityEl.appendChild(boxEl);
+
+                sceneEl.appendChild(entityEl);
             }
-
-            // Create an entity for each audio source with visual representation
-            let entityEl = document.createElement('a-entity');
-            entityEl.setAttribute('position', `${x} ${y} ${z}`);
-            entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
-
-            let boxEl = document.createElement('a-box');
-            boxEl.setAttribute('position', '0 0 0');
-            boxEl.setAttribute('color', 'white'); // Translucent white
-            boxEl.setAttribute('opacity', '0.5'); // 50% transparency
-            boxEl.setAttribute('material', 'wireframe: true'); // Wireframe
-            boxEl.setAttribute('depth', '0.5');
-            boxEl.setAttribute('height', '0.5');
-            boxEl.setAttribute('width', '0.5');
-            entityEl.appendChild(boxEl);
-
-            sceneEl.appendChild(entityEl);
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 </html>
