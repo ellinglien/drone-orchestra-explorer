@@ -48,40 +48,41 @@
         </a-assets>
     </a-scene>
 
-<script>
-    document.getElementById('startButton').addEventListener('click', function () {
-        var sceneEl = document.querySelector('a-scene');
-        var assets = sceneEl.querySelectorAll('audio');
-        var totalAssets = assets.length;
-        var loadedAssets = 0;
+    <script>
+        document.getElementById('startButton').addEventListener('click', function () {
+            var sceneEl = document.querySelector('a-scene');
+            var assets = sceneEl.querySelectorAll('audio');
+            var totalAssets = assets.length;
+            var loadedAssets = 0;
 
-        // Ensure each audio asset triggers loading
-        assets.forEach(function (audio) {
-            // Listener to update loading progress as data is available
-            audio.addEventListener('loadeddata', function () {
-                loadedAssets++;
-                updateLoadingBar(loadedAssets, totalAssets);
-                if (loadedAssets >= totalAssets) {
-                    document.getElementById('loadingBar').style.display = 'none'; // Hide loading bar
-                    startExperience(); // Function to start the experience
-                }
+            assets.forEach(function (audio) {
+                // Use 'canplay' event for broader compatibility
+                audio.addEventListener('canplay', function () {
+                    console.log(`Audio ${audio.id} can play.`);
+                    loadedAssets++;
+                    updateLoadingBar(loadedAssets, totalAssets);
+                    if (loadedAssets >= totalAssets) {
+                        document.getElementById('loadingBar').style.display = 'none'; // Hide loading bar
+                        startExperience(); // Function to start the experience
+                    }
+                });
+                audio.load(); // Explicit call to load to ensure iOS starts fetching data
             });
-            audio.load(); // Explicitly call load to ensure the browser starts fetching data
         });
-    });
 
-    function updateLoadingBar(loaded, total) {
-        var progress = (loaded / total) * 100;
-        document.getElementById('loadingBarInner').style.width = progress + '%';
-    }
+        function updateLoadingBar(loaded, total) {
+            var progress = (loaded / total) * 100;
+            document.getElementById('loadingBarInner').style.width = progress + '%';
+            console.log(`Loading progress: ${progress}%`); // Log progress for debugging
+        }
 
-    function startExperience() {
-        var assets = document.querySelectorAll('audio');
-        assets.forEach(audio => {
-            audio.play(); // Play audio when ready
-        });
-        // Additional logic to start VR experience
-    }
-</script>
+        function startExperience() {
+            var assets = document.querySelectorAll('audio');
+            assets.forEach(audio => {
+                audio.play(); // Play audio when ready
+            });
+            // Additional logic to start VR experience
+        }
+    </script>
 </body>
 </html>
