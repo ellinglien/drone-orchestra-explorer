@@ -85,7 +85,52 @@
       </a-assets>
         <!-- Camera with enhanced movement controls -->
 <a-entity camera look-controls flight-controls="speed: 200; acceleration: 200; easing: 5" position="0 1.6 0"></a-entity>
-    </a-scene>
+ 
+
+<!-- Example Cube -->
+    <a-box id="targetCube" position="0 0 -5" depth="1" height="0" width="0" color="none"></a-box>
+
+      <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+    const sceneEl = document.querySelector('a-scene');
+    sceneEl.addEventListener('loaded', function() {
+        // Once the scene is loaded, setup audio elements
+        const audios = document.querySelectorAll('audio');
+        audios.forEach(audio => {
+            // Ensure the audio metadata is loaded to get the duration
+            if (audio.readyState >= 2) {
+                setupAudio(audio);
+            } else {
+                // Wait for metadata to load
+                audio.addEventListener('loadedmetadata', () => setupAudio(audio));
+            }
+        });
+    });
+
+    function setupAudio(audio) {
+        const duration = audio.duration;
+        const randomStart = Math.random() * duration;
+        audio.currentTime = randomStart; // Set the start time at a random point
+        audio.loop = true; // Enable looping
+        audio.play(); // Start playback
+    }
+           document.addEventListener('DOMContentLoaded', function() {
+            const cameraEl = document.querySelector('[camera]');
+            const cubeEl = document.getElementById('targetCube');
+
+            // Calculate a position for the camera: This positions the camera 10 units away from the cube, directly in front of it.
+            let cubePos = cubeEl.object3D.position;
+            let offset = new THREE.Vector3(0, 0, 10);  // You can adjust this vector to change the distance and angle.
+            let cameraPos = cubePos.clone().add(offset);
+
+            // Set the camera's position and orient it to look at the cube
+            cameraEl.setAttribute('position', cameraPos);
+            cameraEl.setAttribute('look-at', `#${cubeEl.id}`);
+        });
+    </script>
+
+   </a-scene>
 
     <script>
         document.getElementById('startButton').addEventListener('click', function () {
