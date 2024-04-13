@@ -7,70 +7,78 @@
     <style>
         /* Ensure button is clickable by bringing it above the A-Frame canvas */
         #startButton {
-            position: absolute;  /* Position it relative to the viewport */
-            z-index: 9999;       /* Higher z-index so it's above A-Frame canvas */
-            top: 10px;           /* Margin from the top of the viewport */
-            left: 10px;          /* Margin from the left of the viewport */
-            padding: 10px 20px;  /* Padding for better appearance */
-            font-size: 16px;     /* Larger font size for better readability */
-            cursor: pointer;     /* Cursor indicates it's clickable */
+            position: absolute;
+            z-index: 9999;
+            top: 10px;
+            left: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        /* Style for the loading bar */
+        #loadingBar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 30px;
+            transform: translate(-50%, -50%);
+            background: #eee;
+            border: 2px solid #222;
+            z-index: 10000; /* Make sure this is visible over other content */
+        }
+        #loadingBarInner {
+            height: 100%;
+            background: #4CAF50; /* Green color to indicate progress */
+            width: 0%; /* Start with no progress */
         }
     </style>
 </head>
 <body>
     <button id="startButton">Start Experience</button>
+    <div id="loadingBar">
+        <div id="loadingBarInner"></div>
+    </div>
     <a-scene>
-        <a-assets timeout="300000">
-            <!-- Preload the audio files -->
-            <audio id="drone1" src="/audio/00001drone.ogg" preload="auto"></audio>
-            <audio id="drone2" src="/audio/00002drone.ogg" preload="auto"></audio>
-            <audio id="drone3" src="/audio/00003drone.ogg" preload="auto"></audio>
-            <audio id="drone4" src="/audio/00004drone.ogg" preload="auto"></audio>
-            <audio id="drone5" src="/audio/00005drone.ogg" preload="auto"></audio>
-       
-
+        <a-assets>
+            <!-- Audio files setup for streaming with minimal preload -->
+            <audio id="drone1" src="/audio/00001drone.ogg" preload="metadata"></audio>
+            <audio id="drone2" src="/audio/00002drone.ogg" preload="metadata"></audio>
+            <audio id="drone3" src="/audio/00003drone.ogg" preload="metadata"></audio>
         </a-assets>
-
-        <!-- Placeholder entities for the audio sources to be dynamically attached -->
     </a-scene>
 
     <script>
         document.getElementById('startButton').addEventListener('click', function () {
             var sceneEl = document.querySelector('a-scene');
-            var radius = 5; // Reduced radius for closer audio source placement
-            var y = 1.6;    // Height of the audio sources
+            var assets = sceneEl.querySelectorAll('audio');
+            var totalAssets = assets.length;
+            var loadedAssets = 0;
 
-            for (let i = 1; i <= 6; i++) {  // Updated to include all six audio files
-                let angle = (i / 6) * Math.PI * 2; // Adjust loop to use 6
-                let x = Math.cos(angle) * radius;
-                let z = Math.sin(angle) * radius;
-                let audioId = `drone${i}`;
-
-                // Ensure audio elements are available
-                let audioEl = document.getElementById(audioId);
-                if (!audioEl.src) {
-                    // Only set src if not already set
-                    audioEl.src = `/audio/0000${i.toString().padStart(2, '0')}drone.ogg`;
-                    audioEl.load(); // Force the browser to load the new source
-                }
-
-                // Create an entity for each audio source
-                let entityEl = document.createElement('a-entity');
-                entityEl.setAttribute('position', `${x} ${y} ${z}`);
-                entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
-
-                // Add a visual cube for each audio source
-                let boxEl = document.createElement('a-box');
-                boxEl.setAttribute('position', '0 0 0');
-                boxEl.setAttribute('color', '#1a1a2e');
-                boxEl.setAttribute('depth', '0.5');
-                boxEl.setAttribute('height', '0.5');
-                boxEl.setAttribute('width', '0.5');
-                entityEl.appendChild(boxEl);
-
-                sceneEl.appendChild(entityEl);
-            }
+            assets.forEach(function (audio) {
+                // Update loading progress as each file can play through
+                audio.addEventListener('canplaythrough', function () {
+                    loadedAssets++;
+                    updateLoadingBar(loadedAssets, totalAssets);
+                    if (loadedAssets >= totalAssets) {
+                        document.getElementById('loadingBar').style.display = 'none'; // Hide loading bar
+                        startExperience(assets); // Function to start the experience
+                    }
+                });
+            });
         });
+
+        function updateLoadingBar(loaded, total) {
+            var progress = (loaded / total) * 100;
+            document.getElementById('loadingBarInner').style.width = progress + '%';
+        }
+
+        function startExperience(assets) {
+            assets.forEach(audio => {
+                audio.play(); // Play audio when enough has loaded to start
+            });
+            // Additional logic to start VR experience
+        }
     </script>
 </body>
 </html>
