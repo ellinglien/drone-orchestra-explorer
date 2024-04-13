@@ -18,38 +18,56 @@
         }
     </style>
   
-  <script>
-    // A-Frame JavaScript to add vertical movement capabilities
-    AFRAME.registerComponent('vertical-movement', {
-        init: function() {
-            this.velocity = 0;
-            this.acceleration = 5; // Customize as needed
+ <script>
+  AFRAME.registerComponent('flight-controls', {
+    schema: {
+      speed: {type: 'number', default: 10},
+      acceleration: {type: 'number', default: 20},
+      easing: {type: 'number', default: 3} // Easing factor
+    },
+    init: function() {
+      this.velocity = new THREE.Vector3(0, 0, 0);
+      this.direction = new THREE.Vector3(0, 0, 0);
+      this.keys = {};
+      window.addEventListener('keydown', (event) => this.onKeyDown(event));
+      window.addEventListener('keyup', (event) => this.onKeyUp(event));
+    },
+    onKeyDown: function(event) {
+      this.keys[event.code] = true;
+    },
+    onKeyUp: function(event) {
+      this.keys[event.code] = false;
+    },
+    tick: function(time, timeDelta) {
+      const data = this.data;
+      const acceleration = new THREE.Vector3(0, 0, 0);
+      const cameraWorldQuaternion = new THREE.Quaternion();
+      this.el.object3D.getWorldQuaternion(cameraWorldQuaternion);
 
-            window.addEventListener('keydown', (event) => {
-                if (event.key === 'q') { // Press 'Q' to move up
-                    this.velocity = this.acceleration;
-                }
-                if (event.key === 'e') { // Press 'E' to move down
-                    this.velocity = -this.acceleration;
-                }
-            });
+      // Direction based on key press
+      if (this.keys['KeyW']) acceleration.z -= data.acceleration;
+      if (this.keys['KeyS']) acceleration.z += data.acceleration;
+      if (this.keys['KeyA']) acceleration.x -= data.acceleration;
+      if (this.keys['KeyD']) acceleration.x += data.acceleration;
+      acceleration.applyQuaternion(cameraWorldQuaternion);
+      acceleration.multiplyScalar(timeDelta / 1000);
 
-            window.addEventListener('keyup', (event) => {
-                if (event.key === 'q' || event.key === 'e') {
-                    this.velocity = 0;
-                }
-            });
-        },
-        tick: function(time, timeDelta) {
-            let position = this.el.getAttribute('position');
-            position.y += this.velocity * timeDelta / 1000; // Adjust position based on velocity
-            this.el.setAttribute('position', position);
-        }
-    });
+      // Update velocity with easing
+      this.velocity.add(acceleration);
+      this.velocity.multiplyScalar(data.easing * timeDelta / 1000);
+
+      // Update position
+      const positionDelta = new THREE.Vector3(this.velocity.x, this.velocity.y, this.velocity.z);
+      positionDelta.multiplyScalar(timeDelta / 1000);
+      this.el.object3D.position.add(positionDelta);
+    }
+  });
 </script>
+
+
 </head>
 <body>
-    <button id="startButton">THERE IS NO STOP</button>
+    <button id="startButton">THERE'S NO GOING BACK</button>
     <a-scene background="color: black">
         <a-assets>
 
@@ -66,7 +84,7 @@
                <audio id="drone10" src="/audio/00010drone.ogg" preload="metadata"></audio>
       </a-assets>
         <!-- Camera with enhanced movement controls -->
-<a-entity camera wasd-controls look-controls="reverseMouseDrag: false" vertical-movement position="0 1.6 0"></a-entity>
+<a-entity camera look-controls flight-controls="speed: 200; acceleration: 200; easing: 5" position="0 1.6 0"></a-entity>
     </a-scene>
 
     <script>
