@@ -5,7 +5,6 @@
     <title>DRONE ORCHESTRA CONCERT</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <style>
-        /* Ensure button is clickable by bringing it above the A-Frame canvas */
         #startButton {
             position: absolute;
             z-index: 9999;
@@ -15,30 +14,11 @@
             font-size: 16px;
             cursor: pointer;
         }
-        /* Style for the loading bar */
-        #loadingBar {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 300px;
-            height: 30px;
-            transform: translate(-50%, -50%);
-            background: #eee;
-            border: 2px solid #222;
-            z-index: 10000; /* Make sure this is visible over other content */
-        }
-        #loadingBarInner {
-            height: 100%;
-            background: #4CAF50; /* Green color to indicate progress */
-            width: 0%; /* Start with no progress */
-        }
     </style>
 </head>
 <body>
-    <button id="startButton">LET ER RIP</button>
-  
-    </div>
-    <a-scene>
+    <button id="startButton">THERE IS NO STOP</button>
+    <a-scene background="color: black">
         <a-assets>
 
             <!-- Audio files setup for streaming with minimal preload -->
@@ -51,56 +31,49 @@
              <audio id="drone7" src="/audio/00007drone.ogg" preload="metadata"></audio>
             <audio id="drone8" src="/audio/00008drone.ogg" preload="metadata"></audio>
             <audio id="drone9" src="/audio/00009drone.ogg" preload="metadata"></audio>
-        </a-assets>
-       <a-entity camera look-controls wasd-controls="acceleration: 5; easing: 20" position="0 1.6 0"></a-entity>
+               <audio id="drone10" src="/audio/00010drone.ogg" preload="metadata"></audio>
+      </a-assets>
+        <a-entity camera look-controls wasd-controls="acceleration: 5; easing: 20" position="0 1.6 0"></a-entity>
     </a-scene>
 
     <script>
-        document.getElementById('startButton').addEventListener('click', function () {
-            var sceneEl = document.querySelector('a-scene');
-            var radius = 3; // Further reduced radius for closer audio source placement
-            var y = 1.6;    // Height of the audio sources
+    document.getElementById('startButton').addEventListener('click', function () {
+        var sceneEl = document.querySelector('a-scene');
+        var radius = 3; // Base radius for audio source placement
+        var y = 1.6;    // Height of the audio sources
 
-            for (let i = 1; i <= 9; i++) { // Adjusted loop for all drones
-                let angle = (i / 9) * Math.PI * 2; // Proper distribution of drones
-                let x = Math.cos(angle) * radius;
-                let z = Math.sin(angle) * radius;
-                let audioId = `drone${i}`;
+        for (let i = 1; i <= 10; i++) {
+            let angle = (i / 10) * Math.PI * 2; // Base angle for even distribution
+            let randomOffset = Math.random() * 1.5 - 0.25; // Random offset between -0.25 and 0.25
+            let adjustedRadius = radius + randomOffset; // Adjust radius randomly
+            let x = Math.cos(angle) * adjustedRadius;
+            let z = Math.sin(angle) * adjustedRadius;
+            let audioId = `drone${i}`;
 
-                let audioEl = document.getElementById(audioId);
-                if (!audioEl.src) {
-                    audioEl.src = `/audio/0000${i.toString().padStart(2, '0')}drone.ogg`; // Ensure audio elements are sourced
-                    audioEl.load();
-                }
-
-                // Create an entity for each audio source with visual representation
-                let entityEl = document.createElement('a-entity');
-                entityEl.setAttribute('position', `${x} ${y} ${z}`);
-                entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
-
-                let boxEl = document.createElement('a-box');
-                boxEl.setAttribute('position', '0 0 0');
-                boxEl.setAttribute('color', '#1a1a2e');
-                boxEl.setAttribute('depth', '0.5');
-                boxEl.setAttribute('height', '0.5');
-                boxEl.setAttribute('width', '0.5');
-                entityEl.appendChild(boxEl);
-
-                sceneEl.appendChild(entityEl);
+            let audioEl = document.getElementById(audioId);
+            if (!audioEl.src) {
+                audioEl.src = `/audio/0000${i.toString().padStart(2, '0')}drone.ogg`; // Ensure audio elements are sourced
+                audioEl.load();
             }
-        });
 
-        function updateLoadingBar(loaded, total) {
-            var progress = (loaded / total) * 100;
-            document.getElementById('loadingBarInner').style.width = progress + '%';
-        }
+            // Create an entity for each audio source with visual representation
+            let entityEl = document.createElement('a-entity');
+            entityEl.setAttribute('position', `${x} ${y} ${z}`);
+            entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
 
-        function startExperience() {
-            var assets = document.querySelectorAll('audio');
-            assets.forEach(audio => {
-                audio.play();
-            });
+            let boxEl = document.createElement('a-box');
+            boxEl.setAttribute('position', '0 0 0');
+            boxEl.setAttribute('color', 'white'); // Translucent white
+            boxEl.setAttribute('opacity', '0.5'); // 50% transparency
+            boxEl.setAttribute('material', 'wireframe: true'); // Wireframe
+            boxEl.setAttribute('depth', '0.5');
+            boxEl.setAttribute('height', '0.5');
+            boxEl.setAttribute('width', '0.5');
+            entityEl.appendChild(boxEl);
+
+            sceneEl.appendChild(entityEl);
         }
-    </script>
+    });
+</script>
 </body>
 </html>
