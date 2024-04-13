@@ -5,64 +5,72 @@
     <title>Interactive Drone Music Player</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <style>
+        /* Ensure button is clickable by bringing it above the A-Frame canvas */
         #startButton {
-            position: absolute;
-            z-index: 9999;
-            top: 10px;
-            left: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            display: none; /* Initially hidden */
+            position: absolute;  /* Position it relative to the viewport */
+            z-index: 9999;       /* Higher z-index so it's above A-Frame canvas */
+            top: 10px;           /* Margin from the top of the viewport */
+            left: 10px;          /* Margin from the left of the viewport */
+            padding: 10px 20px;  /* Padding for better appearance */
+            font-size: 16px;     /* Larger font size for better readability */
+            cursor: pointer;     /* Cursor indicates it's clickable */
         }
     </style>
 </head>
 <body>
-    <button id="startButton" disabled>Start Experience</button>
+    <button id="startButton">Start Experience</button>
     <a-scene>
         <a-assets timeout="300000">
-            <!-- Preload only the first audio file initially -->
-            <audio id="drone1" src="https://road-excessive-belief.me/audio/00001drone.ogg" crossorigin="anonymous" preload="auto"></audio>
+            <!-- Preload the audio files -->
+            <audio id="drone1" src="/audio/00001drone.ogg" preload="auto"></audio>
+            <audio id="drone2" src="/audio/00002drone.ogg" preload="auto"></audio>
+            <audio id="drone3" src="/audio/00003drone.ogg" preload="auto"></audio>
+            <audio id="drone4" src="/audio/00004drone.ogg" preload="auto"></audio>
+            <audio id="drone5" src="/audio/00005drone.ogg" preload="auto"></audio>
+       
+
         </a-assets>
 
-        <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+        <!-- Placeholder entities for the audio sources to be dynamically attached -->
     </a-scene>
 
     <script>
-    document.querySelector('a-scene').addEventListener('loaded', function () {
-        var button = document.getElementById('startButton');
-        button.style.display = 'block'; // Show the button
-        button.disabled = false; // Enable the button
-        button.addEventListener('click', function () {
-            loadDrones();
-        });
-    });
+        document.getElementById('startButton').addEventListener('click', function () {
+            var sceneEl = document.querySelector('a-scene');
+            var radius = 5; // Reduced radius for closer audio source placement
+            var y = 1.6;    // Height of the audio sources
 
-    function loadDrones() {
-        var sceneEl = document.querySelector('a-scene');
-        var radius = 10; // Radius of the circle
-        var y = 1.6;   // Height of the audio sources
-        for (let i = 2; i <= 10; i++) {
-            setTimeout(function () {
-                let angle = (i / 10) * Math.PI * 2;
+            for (let i = 1; i <= 6; i++) {  // Updated to include all six audio files
+                let angle = (i / 6) * Math.PI * 2; // Adjust loop to use 6
                 let x = Math.cos(angle) * radius;
                 let z = Math.sin(angle) * radius;
                 let audioId = `drone${i}`;
-                let audioSrc = `/audio/0000${String(i).padStart(2, '0')}drone.ogg`; // Adjusted to local path
-                let audioEl = document.createElement('audio');
-                audioEl.setAttribute('id', audioId);
-                audioEl.setAttribute('src', audioSrc);
-                audioEl.setAttribute('crossorigin', 'anonymous');
-                document.body.appendChild(audioEl);
 
+                // Ensure audio elements are available
+                let audioEl = document.getElementById(audioId);
+                if (!audioEl.src) {
+                    // Only set src if not already set
+                    audioEl.src = `/audio/0000${i.toString().padStart(2, '0')}drone.ogg`;
+                    audioEl.load(); // Force the browser to load the new source
+                }
+
+                // Create an entity for each audio source
                 let entityEl = document.createElement('a-entity');
                 entityEl.setAttribute('position', `${x} ${y} ${z}`);
-                entityEl.setAttribute('sound', `src: #${audioId}; rolloffFactor: 1.5; refDistance: 1; maxDistance: 50;`);
-                sceneEl.appendChild(entityEl);
-            }, i * 1000); // Delay loading each subsequent file to reduce load
-        }
-    }
-</script>
+                entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
 
+                // Add a visual cube for each audio source
+                let boxEl = document.createElement('a-box');
+                boxEl.setAttribute('position', '0 0 0');
+                boxEl.setAttribute('color', '#1a1a2e');
+                boxEl.setAttribute('depth', '0.5');
+                boxEl.setAttribute('height', '0.5');
+                boxEl.setAttribute('width', '0.5');
+                entityEl.appendChild(boxEl);
+
+                sceneEl.appendChild(entityEl);
+            }
+        });
+    </script>
 </body>
 </html>
