@@ -2,185 +2,456 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>DRONE EXPLORER</title>
+    <title>DRONE ORCHESTRA</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <!-- Include A-Frame Extras for enhanced movement controls -->
     <script src="https://unpkg.com/aframe-extras@6/dist/aframe-extras.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/aframe-physics-system/dist/aframe-physics-system.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system/dist/aframe-physics-system.min.js"></script>
     <style>
-        #startButton {
-            position: absolute;
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             z-index: 9999;
-            top: 10px;
-            left: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
+        }
+        
+        #title {
+            font-size: 80px;
+            font-weight: bold;
+            color: #FFF;
+            margin-bottom: 60px;
+            text-align: center;
+            letter-spacing: 10px;
+        }
+        
+        #startButton {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #330000;
+            color: white;
+            border: none;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #startButton:hover {
+            background-color: #990000;
+            transform: scale(1.05);
+        }
+        
+        #controls {
+            color: white;
+            margin-top: 40px;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        #brightness-controls {
+            position: absolute;
+            z-index: 9998;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 5px;
+            color: white;
+            display: none;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .slider-container label {
+            margin-right: 10px;
+            width: 100px;
+        }
+        
+        input[type="range"] {
+            width: 150px;
+        }
+        
+        #muteButton {
+            padding: 8px 15px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        #muteButton:hover {
+            background-color: #666;
+        }
+        
+        #muteButton.muted {
+            background-color: #990000;
+        }
+        
+        #how-it-works {
+            color: white;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 5px;
+            position: absolute;
+            z-index: 9998;
+            top: 20px;
+            left: 20px;
+            max-width: 300px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        #how-it-works h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
         }
     </style>
   
- <script>
-  AFRAME.registerComponent('flight-controls', {
-    schema: {
-        speed: {type: 'number', default: 10},
-        acceleration: {type: 'number', default: 50},
-        easing: {type: 'number', default: 0.5}, // This controls the 'inertia' or 'momentum'
-        friction: {type: 'number', default: 0.05} // Friction to slowly stop the movement
-    },
-    init: function() {
-        this.velocity = new THREE.Vector3(0, 0, 0);
-        this.direction = new THREE.Vector3(0, 0, 0);
-        this.keys = {};
-        window.addEventListener('keydown', (event) => this.onKeyDown(event));
-        window.addEventListener('keyup', (event) => this.onKeyUp(event));
-    },
-    onKeyDown: function(event) {
-        this.keys[event.code] = true;
-    },
-    onKeyUp: function(event) {
-        this.keys[event.code] = false;
-    },
-    tick: function(time, timeDelta) {
-        const data = this.data;
-        const acceleration = new THREE.Vector3(0, 0, 0);
-        const cameraWorldQuaternion = new THREE.Quaternion();
-        this.el.object3D.getWorldQuaternion(cameraWorldQuaternion);
+    <script>
+        AFRAME.registerComponent('flight-controls', {
+            schema: {
+                speed: {type: 'number', default: 10},
+                acceleration: {type: 'number', default: 50},
+                easing: {type: 'number', default: 0.5}, // This controls the 'inertia' or 'momentum'
+                friction: {type: 'number', default: 0.05} // Friction to slowly stop the movement
+            },
+            init: function() {
+                this.velocity = new THREE.Vector3(0, 0, 0);
+                this.direction = new THREE.Vector3(0, 0, 0);
+                this.keys = {};
+                window.addEventListener('keydown', (event) => this.onKeyDown(event));
+                window.addEventListener('keyup', (event) => this.onKeyUp(event));
+            },
+            onKeyDown: function(event) {
+                this.keys[event.code] = true;
+            },
+            onKeyUp: function(event) {
+                this.keys[event.code] = false;
+            },
+            tick: function(time, timeDelta) {
+                const data = this.data;
+                const acceleration = new THREE.Vector3(0, 0, 0);
+                const cameraWorldQuaternion = new THREE.Quaternion();
+                this.el.object3D.getWorldQuaternion(cameraWorldQuaternion);
 
-        // Apply acceleration based on key press
-        if (this.keys['KeyW']) acceleration.z -= data.acceleration;
-        if (this.keys['KeyS']) acceleration.z += data.acceleration;
-        if (this.keys['KeyA']) acceleration.x -= data.acceleration;
-        if (this.keys['KeyD']) acceleration.x += data.acceleration;
-        acceleration.applyQuaternion(cameraWorldQuaternion);
-        acceleration.multiplyScalar(timeDelta / 1000);
+                // Apply acceleration based on key press
+                if (this.keys['KeyW']) acceleration.z -= data.acceleration;
+                if (this.keys['KeyS']) acceleration.z += data.acceleration;
+                if (this.keys['KeyA']) acceleration.x -= data.acceleration;
+                if (this.keys['KeyD']) acceleration.x += data.acceleration;
+                acceleration.applyQuaternion(cameraWorldQuaternion);
+                acceleration.multiplyScalar(timeDelta / 1000);
 
-        // Update velocity with the new acceleration
-        this.velocity.add(acceleration);
+                // Update velocity with the new acceleration
+                this.velocity.add(acceleration);
 
-        // Apply friction to simulate momentum and zero gravity effect
-        this.velocity.multiplyScalar(1 - data.friction);
+                // Apply friction to simulate momentum and zero gravity effect
+                this.velocity.multiplyScalar(1 - data.friction);
 
-        // Update position based on velocity
-        const positionDelta = this.velocity.clone().multiplyScalar(timeDelta / 1000);
-        this.el.object3D.position.add(positionDelta);
-    }
-});
-</script>
+                // Update position based on velocity
+                const positionDelta = this.velocity.clone().multiplyScalar(timeDelta / 1000);
+                this.el.object3D.position.add(positionDelta);
+            }
+        });
 
+        // Sound control component to manage global audio volume
+        AFRAME.registerComponent('sound-control', {
+            schema: {
+                volume: {type: 'number', default: 1.0},
+                muted: {type: 'boolean', default: false}
+            },
+            init: function() {
+                this.audioElements = Array.from(document.querySelectorAll('audio'));
+                this.previousVolume = 1.0;
+                
+                // Apply initial volume settings
+                this.updateVolume();
+            },
+            updateVolume: function() {
+                const data = this.data;
+                this.audioElements = Array.from(document.querySelectorAll('audio'));
+                
+                this.audioElements.forEach(audio => {
+                    if (data.muted) {
+                        audio.volume = 0;
+                    } else {
+                        audio.volume = data.volume;
+                    }
+                });
+            },
+            update: function() {
+                this.updateVolume();
+            }
+        });
 
+        AFRAME.registerComponent('brightness-control', {
+            schema: {
+                brightness: {type: 'number', default: 0.5},  
+                opacity: {type: 'number', default: 1.0}
+            },
+            init: function() {
+                this.entities = [];
+                // Define the muted grey palette (array of colors)
+                this.greyPalette = [
+                    '#4A4A4A', // Dark grey
+                    '#696969', // Dim grey
+                    '#808080', // Medium grey
+                    '#A9A9A9', // Dark grey
+                    '#C0C0C0', // Silver
+                    '#D3D3D3', // Light grey
+                    '#DCDCDC', // Gainsboro
+                    '#778899', // Light slate grey
+                    '#708090', // Slate grey
+                    '#2F4F4F', // Dark slate grey
+                    '#5F9EA0'  // Cadet blue (slightly muted)
+                ];
+            },
+            update: function() {
+                const data = this.data;
+                const entities = document.querySelectorAll('.drone-entity');
+                
+                this.entities = Array.from(entities);
+                
+                this.entities.forEach((entity, index) => {
+                    const polyhedron = entity.querySelector('.drone-object');
+                    if (polyhedron) {
+                        // Use the stored base color for this entity
+                        let baseColor = entity.getAttribute('data-base-color');
+                        if (!baseColor) {
+                            // Assign a base color from the palette if it doesn't have one
+                            baseColor = this.greyPalette[index % this.greyPalette.length];
+                            entity.setAttribute('data-base-color', baseColor);
+                        }
+                        
+                        // Convert hex to RGB for brightness adjustment
+                        let rgb = this.hexToRgb(baseColor);
+                        
+                        // Apply brightness adjustment
+                        const brightness = data.brightness;
+                        rgb.r = Math.floor(rgb.r * brightness);
+                        rgb.g = Math.floor(rgb.g * brightness);
+                        rgb.b = Math.floor(rgb.b * brightness);
+                        
+                        const color = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+                        
+                        polyhedron.setAttribute('material', `color: ${color}; side: double; transparent: true; opacity: ${data.opacity}`);
+                    }
+                });
+            },
+            hexToRgb: function(hex) {
+                // Remove # if present
+                hex = hex.replace(/^#/, '');
+                
+                // Parse the hex values
+                const bigint = parseInt(hex, 16);
+                const r = (bigint >> 16) & 255;
+                const g = (bigint >> 8) & 255;
+                const b = bigint & 255;
+                
+                return { r, g, b };
+            }
+        });
+    </script>
 </head>
 <body>
-    <button id="startButton">THERE'S NO GOING BACK</button>
+    <div id="intro-overlay">
+        <div id="title">DRONE ORCHESTRA</div>
+        <button id="startButton">THERE'S NO GOING BACK</button>
+        <div id="controls">
+            <p><strong>CONTROLS:</strong></p>
+            <p>MOVEMENT: W (forward), S (backward), A (left), D (right)</p>
+            <p>LOOK: Mouse to look around</p>
+            <p>VISUALS: Use brightness and opacity sliders (bottom right)</p>
+            <p>AUDIO: Use volume slider and mute button (bottom right)</p>
+            <p>For the full experience, use headphones.</p>
+        </div>
+    </div>
+    
+    <div id="how-it-works">
+        <h3>HOW IT WORKS</h3>
+        <p>This is a procedural audio-visual experience in which abstract sound sources appear gradually over time.</p>
+        <p>Each object represents a unique drone sound created by different artists. Objects fade in slowly, appearing at random intervals to create an evolving soundscape.</p>
+        <p>The grey objects have different muted tones that respond to the brightness control.</p>
+        <p>Move freely through the space to explore the spatial audio effect - sounds get louder as you approach their source.</p>
+    </div>
+
+    <div id="brightness-controls">
+        <div class="slider-container">
+            <label for="brightness">Brightness:</label>
+            <input type="range" id="brightness" min="0" max="10" value="5" step="0.1">
+        </div>
+        <div class="slider-container">
+            <label for="opacity">Opacity:</label>
+            <input type="range" id="opacity" min="0" max="10" value="10" step="0.1">
+        </div>
+        <div class="slider-container">
+            <label for="volume">Volume:</label>
+            <input type="range" id="volume" min="0" max="10" value="10" step="0.1">
+        </div>
+        <div class="slider-container">
+            <button id="muteButton">MUTE</button>
+        </div>
+    </div>
+
     <a-scene background="color: black">
         <a-assets>
             <!-- Preload the audio files -->
-
             <!-- Audio files setup for streaming with minimal preload -->
             <audio id="drone1" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2Faudio%2FUSTAKNOW_ALIAS_CR05APR2025__CHAOS_DRONE_STEM__ForAprilREMDroneOrchestraCompilationMix_.ogg" preload="metadata"></audio>
             <audio id="drone2" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2FHogardApr25dronebongo.ogg" preload="metadata"></audio>
             <audio id="drone3" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/kerning%20man%20april%20chaos%20drone.ogg" preload="metadata"></audio>
-                      <audio id="drone4" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/ohnonotagain-april2025.ogg" preload="metadata"></audio>
+            <audio id="drone4" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/ohnonotagain-april2025.ogg" preload="metadata"></audio>
             <audio id="drone5" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/AMUC-Chaotic-Drone-April-2025.ogg" preload="metadata"></audio>
             <audio id="drone6" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Kessler-Chaotic-Drone-April-2025.ogg" preload="metadata"></audio>
-             <audio id="drone7" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/jai_DroneOrchestraAvril.ogg" preload="metadata"></audio>
+            <audio id="drone7" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/jai_DroneOrchestraAvril.ogg" preload="metadata"></audio>
             <audio id="drone8" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Metamere%20-%20Drone%20Orchestra%202025-04%20-%20MODOK.ogg" preload="metadata"></audio>
             <audio id="drone9" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Mikey%20-%20Drone%20Orchestra%20Apr%2025%20Chaos.ogg" preload="metadata"></audio>
-               <audio id="drone10" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/CyberneticVoyagerApril2025Chaos.ogg" preload="metadata"></audio>
-<audio id="drone11" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Coyote%20Senate%20Drone%20Orchestra%20April%202025.ogg" preload="metadata"></audio>
-    </a-assets>
+            <audio id="drone10" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/CyberneticVoyagerApril2025Chaos.ogg" preload="metadata"></audio>
+            <audio id="drone11" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Coyote%20Senate%20Drone%20Orchestra%20April%202025.ogg" preload="metadata"></audio>
+        </a-assets>
+        
         <!-- Camera with enhanced movement controls -->
-<a-entity camera look-controls="pointerLockEnabled: true" flight-controls="speed: 7; acceleration: 5; easing: 9" position="0 1.6 0" smooth-look-controls="dampingFactor: 1"></a-entity>
+        <a-entity camera look-controls="pointerLockEnabled: true" flight-controls="speed: 7; acceleration: 5; easing: 9" position="0 1.6 0" smooth-look-controls="dampingFactor: 1"></a-entity>
 
-<!-- Example Cube -->
-    <a-box id="targetCube" position="0 0 -5" depth="1" height="0" width="0" color="none"></a-box>
+        <!-- Example Cube -->
+        <a-box id="targetCube" position="0 0 -5" depth="1" height="0" width="0" color="none"></a-box>
+        
+        <!-- Add brightness control component to the scene -->
+        <a-entity id="brightness-control-entity" brightness-control="brightness: 0.5; opacity: 1.0"></a-entity>
 
-      <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const cameraEl = document.querySelector('[camera]');
-            const cubeEl = document.getElementById('targetCube');
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const cameraEl = document.querySelector('[camera]');
+                const cubeEl = document.getElementById('targetCube');
 
-            // Calculate a position for the camera: This positions the camera 10 units away from the cube, directly in front of it.
-            let cubePos = cubeEl.object3D.position;
-            let offset = new THREE.Vector3(0, 0, 10);  // You can adjust this vector to change the distance and angle.
-            let cameraPos = cubePos.clone().add(offset);
+                // Calculate a position for the camera: This positions the camera 10 units away from the cube, directly in front of it.
+                let cubePos = cubeEl.object3D.position;
+                let offset = new THREE.Vector3(0, 0, 10);  // You can adjust this vector to change the distance and angle.
+                let cameraPos = cubePos.clone().add(offset);
 
-            // Set the camera's position and orient it to look at the cube
-            cameraEl.setAttribute('position', cameraPos);
-            cameraEl.setAttribute('look-at', `#${cubeEl.id}`);
-        });
-    </script>
-</a-scene>
+                // Set the camera's position and orient it to look at the cube
+                cameraEl.setAttribute('position', cameraPos);
+                cameraEl.setAttribute('look-at', `#${cubeEl.id}`);
+            });
+        </script>
+    </a-scene>
 
     <script>
-       document.getElementById('startButton').addEventListener('click', function () {
-    var sceneEl = document.querySelector('a-scene');
-    const primitives = ['box']; // Polyhedron types
-const numberOfEntities = 10;
-    const randomImmediateIndex = Math.floor(Math.random() * numberOfEntities); // Select one random index for immediate load
+        document.getElementById('startButton').addEventListener('click', function () {
+            // Hide intro overlay
+            document.getElementById('intro-overlay').style.display = 'none';
+            // Show brightness controls
+            document.getElementById('brightness-controls').style.display = 'block';
+            
+            var sceneEl = document.querySelector('a-scene');
+            const primitives = ['box']; // Polyhedron types
+            const numberOfEntities = 10;
+            const randomImmediateIndex = Math.floor(Math.random() * numberOfEntities); // Select one random index for immediate load
 
-    for (let i = 0; i < numberOfEntities; i++) {
-        let phi = Math.acos(2 * (i / numberOfEntities) - 1) - Math.PI / 2;
-        let theta = Math.sqrt(numberOfEntities * Math.PI) * phi;
-        let x = Math.cos(theta) * Math.cos(phi) * 5;
-        let y = Math.sin(phi) * 5;
-        let z = Math.sin(theta) * Math.cos(phi) * 5;
-        let audioId = `drone${i + 1}`;
+            for (let i = 0; i < numberOfEntities; i++) {
+                let phi = Math.acos(2 * (i / numberOfEntities) - 1) - Math.PI / 2;
+                let theta = Math.sqrt(numberOfEntities * Math.PI) * phi;
+                let x = Math.cos(theta) * Math.cos(phi) * 5;
+                let y = Math.sin(phi) * 5;
+                let z = Math.sin(theta) * Math.cos(phi) * 5;
+                let audioId = `drone${i + 1}`;
 
-        let entityEl = document.createElement('a-entity');
-        entityEl.setAttribute('position', `${x} ${y} ${z}`);
+                let entityEl = document.createElement('a-entity');
+                entityEl.setAttribute('position', `${x} ${y} ${z}`);
+                entityEl.setAttribute('class', 'drone-entity');
 
-        let primitiveType = primitives[Math.floor(Math.random() * primitives.length)];
-        let polyhedronEl = document.createElement('a-entity');
-        polyhedronEl.setAttribute('geometry', `primitive: ${primitiveType}; radius: 0.5; detail: 0`);
-        polyhedronEl.setAttribute('material', 'color: #1a0000; side: double; transparent: true; opacity: 0');
-        polyhedronEl.setAttribute('visible', 'false');
+                let primitiveType = primitives[Math.floor(Math.random() * primitives.length)];
+                let polyhedronEl = document.createElement('a-entity');
+                polyhedronEl.setAttribute('geometry', `primitive: ${primitiveType}; radius: 0.5; detail: 0`);
+                polyhedronEl.setAttribute('material', 'color: #1a0000; side: double; transparent: true; opacity: 0');
+                polyhedronEl.setAttribute('visible', 'false');
+                polyhedronEl.setAttribute('class', 'drone-object');
 
-        let initialRotation = {x: Math.random() * 360, y: Math.random() * 360, z: Math.random() * 360};
-        polyhedronEl.setAttribute('rotation', `${initialRotation.x} ${initialRotation.y} ${initialRotation.z}`);
+                let initialRotation = {x: Math.random() * 360, y: Math.random() * 360, z: Math.random() * 360};
+                polyhedronEl.setAttribute('rotation', `${initialRotation.x} ${initialRotation.y} ${initialRotation.z}`);
 
-        let scaleMin = 0.8 + Math.random() * 0.7;
-        let scaleMax = 2.0 + Math.random();
-        let duration = 20000 + Math.random() * 4000;
-        let delay = i === randomImmediateIndex ? 0 : Math.random() * 100000 + 1000; // Immediate for the selected index, random delay for others
+                let scaleMin = 0.8 + Math.random() * 0.7;
+                let scaleMax = 2.0 + Math.random();
+                let duration = 20000 + Math.random() * 4000;
+                let delay = i === randomImmediateIndex ? 0 : Math.random() * 100000 + 1000; // Immediate for the selected index, random delay for others
 
-        setTimeout(() => {
-            polyhedronEl.setAttribute('visible', 'true');
-            polyhedronEl.setAttribute('animation__opacity', `property: material.opacity; from: 0; to: 1; dur: 10000; easing: easeInOutQuad`);
-            entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
-        }, delay);
+                setTimeout(() => {
+                    polyhedronEl.setAttribute('visible', 'true');
+                    polyhedronEl.setAttribute('animation__opacity', `property: material.opacity; from: 0; to: 1; dur: 10000; easing: easeInOutQuad`);
+                    entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
+                    
+                    // Update the brightness control to affect the new entity
+                    let brightnessControlEntity = document.getElementById('brightness-control-entity');
+                    let component = brightnessControlEntity.components['brightness-control'];
+                    if (component) {
+                        component.update();
+                    }
+                }, delay);
 
-        entityEl.appendChild(polyhedronEl);
-        sceneEl.appendChild(entityEl);
-    }
-         // Hide the button once it's pressed
-    document.getElementById('startButton').style.display = 'none';
-});
+                entityEl.appendChild(polyhedronEl);
+                sceneEl.appendChild(entityEl);
+            }
+        });
 
-AFRAME.registerComponent('smooth-look-controls', {
-    schema: {
-      dampingFactor: { type: 'number', default: 0.5 },
-      decayFactor: { type: 'number', default: 0.95 } // Control how quickly to reduce follow-through
-    },
-    init: function () {
-      this.targetRotation = new THREE.Quaternion();
-      this.currentRotation = new THREE.Quaternion();
-      this.decay = 1.0; // Start with no reduction in damping
-    },
-    tick: function (time, timeDelta) {
-      var data = this.data;
-      var obj3D = this.el.object3D;
-      var delta = (timeDelta / 1000) * data.dampingFactor * this.decay; // Apply decay to damping
+        // Set up brightness and opacity sliders
+        document.getElementById('brightness').addEventListener('input', function(e) {
+            const value = e.target.value / 10; // Convert 0-10 to 0-1
+            const brightnessControlEntity = document.getElementById('brightness-control-entity');
+            const opacityValue = document.getElementById('opacity').value / 10;
+            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${value}; opacity: ${opacityValue}`);
+        });
 
-      // Update decay factor, reducing the damping effect over time
-      this.decay *= data.decayFactor;
-      this.decay = Math.max(this.decay, 0.1); // Ensure decay does not reduce damping below a minimum threshold
+        document.getElementById('opacity').addEventListener('input', function(e) {
+            const value = e.target.value / 10; // Convert 0-10 to 0-1
+            const brightnessControlEntity = document.getElementById('brightness-control-entity');
+            const brightnessValue = document.getElementById('brightness').value / 10;
+            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${brightnessValue}; opacity: ${value}`);
+        });
 
-      // Convert current and target to Quaternion to use slerp for smoothing
-      this.targetRotation.copy(obj3D.quaternion);
-      this.currentRotation.slerp(this.targetRotation, delta); // Spherical linear interpolation
-      obj3D.quaternion.copy(this.currentRotation);
-    }
-  });
-        </script>
+        AFRAME.registerComponent('smooth-look-controls', {
+            schema: {
+                dampingFactor: { type: 'number', default: 0.5 },
+                decayFactor: { type: 'number', default: 0.95 } // Control how quickly to reduce follow-through
+            },
+            init: function () {
+                this.targetRotation = new THREE.Quaternion();
+                this.currentRotation = new THREE.Quaternion();
+                this.decay = 1.0; // Start with no reduction in damping
+            },
+            tick: function (time, timeDelta) {
+                var data = this.data;
+                var obj3D = this.el.object3D;
+                var delta = (timeDelta / 1000) * data.dampingFactor * this.decay; // Apply decay to damping
+
+                // Update decay factor, reducing the damping effect over time
+                this.decay *= data.decayFactor;
+                this.decay = Math.max(this.decay, 0.1); // Ensure decay does not reduce damping below a minimum threshold
+
+                // Convert current and target to Quaternion to use slerp for smoothing
+                this.targetRotation.copy(obj3D.quaternion);
+                this.currentRotation.slerp(this.targetRotation, delta); // Spherical linear interpolation
+                obj3D.quaternion.copy(this.currentRotation);
+            }
+        });
+    </script>
 </body>
 </html>
