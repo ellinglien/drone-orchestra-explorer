@@ -39,13 +39,15 @@
         }
         
         #startButton {
-            padding: 15px 30px;
-            font-size: 18px;
+            padding: 25px 40px;
+            font-size: 28px;
             background-color: #330000;
             color: white;
             border: none;
             cursor: pointer;
             transition: all 0.3s;
+            letter-spacing: 3px;
+            border-radius: 5px;
         }
         
         #startButton:hover {
@@ -89,13 +91,15 @@
         }
         
         #muteButton {
-            padding: 8px 15px;
+            padding: 10px 20px;
             background-color: #444;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 16px;
+            width: 150px;
         }
         
         #muteButton:hover {
@@ -123,6 +127,64 @@
         #how-it-works h3 {
             margin-top: 0;
             margin-bottom: 8px;
+        }
+        
+        #click-instructions {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        #target-reticle {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            transform: translate(-50%, -50%);
+            z-index: 9997;
+            pointer-events: none;
+        }
+        
+        #target-reticle::before,
+        #target-reticle::after {
+            content: '';
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        
+        #target-reticle::before {
+            width: 20px;
+            height: 2px;
+            top: 9px;
+            left: 0;
+        }
+        
+        #target-reticle::after {
+            width: 2px;
+            height: 20px;
+            top: 0;
+            left: 9px;
+        }
+        
+        #target-reticle.active::before,
+        #target-reticle.active::after {
+            background-color: rgba(255, 0, 0, 0.8);
+        }
+        
+        #target-info {
+            position: fixed;
+            top: 52%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            pointer-events: none;
+            z-index: 9997;
+            text-shadow: 1px 1px 2px black;
         }
     </style>
   
@@ -279,9 +341,10 @@
         <div id="controls">
             <p><strong>CONTROLS:</strong></p>
             <p>MOVEMENT: W (forward), S (backward), A (left), D (right)</p>
-            <p>LOOK: Mouse to look around</p>
-            <p>VISUALS: Use brightness and opacity sliders (bottom right)</p>
-            <p>AUDIO: Use volume slider and mute button (bottom right)</p>
+            <p>LOOK: Click screen to look around, ESC to release cursor</p>
+            <p>VISUALS: Use brightness slider (bottom right)</p>
+            <p>AUDIO: Volume slider and mute button control all sounds</p>
+            <p>TARGET: Point at objects to highlight, SPACE to mute individual sounds</p>
             <p>For the full experience, use headphones.</p>
         </div>
     </div>
@@ -300,15 +363,15 @@
             <input type="range" id="brightness" min="0" max="10" value="5" step="0.1">
         </div>
         <div class="slider-container">
-            <label for="opacity">Opacity:</label>
-            <input type="range" id="opacity" min="0" max="10" value="10" step="0.1">
-        </div>
-        <div class="slider-container">
             <label for="volume">Volume:</label>
             <input type="range" id="volume" min="0" max="10" value="10" step="0.1">
         </div>
         <div class="slider-container">
-            <button id="muteButton">MUTE</button>
+            <button id="muteButton">MUTE ALL</button>
+        </div>
+        <div id="click-instructions">
+            Click the screen to look around. Press ESC to release cursor.
+            <br>Point at an object and press SPACE to mute/unmute it.
         </div>
     </div>
 
@@ -316,27 +379,35 @@
         <a-assets>
             <!-- Preload the audio files -->
             <!-- Audio files setup for streaming with minimal preload -->
-            <audio id="drone1" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2Faudio%2FUSTAKNOW_ALIAS_CR05APR2025__CHAOS_DRONE_STEM__ForAprilREMDroneOrchestraCompilationMix_.ogg" preload="metadata"></audio>
-            <audio id="drone2" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2FHogardApr25dronebongo.ogg" preload="metadata"></audio>
-            <audio id="drone3" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/kerning%20man%20april%20chaos%20drone.ogg" preload="metadata"></audio>
-            <audio id="drone4" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/ohnonotagain-april2025.ogg" preload="metadata"></audio>
-            <audio id="drone5" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/AMUC-Chaotic-Drone-April-2025.ogg" preload="metadata"></audio>
-            <audio id="drone6" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Kessler-Chaotic-Drone-April-2025.ogg" preload="metadata"></audio>
-            <audio id="drone7" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/jai_DroneOrchestraAvril.ogg" preload="metadata"></audio>
-            <audio id="drone8" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Metamere%20-%20Drone%20Orchestra%202025-04%20-%20MODOK.ogg" preload="metadata"></audio>
-            <audio id="drone9" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Mikey%20-%20Drone%20Orchestra%20Apr%2025%20Chaos.ogg" preload="metadata"></audio>
-            <audio id="drone10" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/CyberneticVoyagerApril2025Chaos.ogg" preload="metadata"></audio>
-            <audio id="drone11" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Coyote%20Senate%20Drone%20Orchestra%20April%202025.ogg" preload="metadata"></audio>
+            <audio id="drone1" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2Faudio%2FUSTAKNOW_ALIAS_CR05APR2025__CHAOS_DRONE_STEM__ForAprilREMDroneOrchestraCompilationMix_.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone2" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2FHogardApr25dronebongo.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone3" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/kerning%20man%20april%20chaos%20drone.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone4" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/ohnonotagain-april2025.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone5" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/AMUC-Chaotic-Drone-April-2025.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone6" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Kessler-Chaotic-Drone-April-2025.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone7" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/jai_DroneOrchestraAvril.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone8" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Metamere%20-%20Drone%20Orchestra%202025-04%20-%20MODOK.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone9" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Mikey%20-%20Drone%20Orchestra%20Apr%2025%20Chaos.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone10" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/CyberneticVoyagerApril2025Chaos.ogg" preload="metadata" crossorigin="anonymous"></audio>
+            <audio id="drone11" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Coyote%20Senate%20Drone%20Orchestra%20April%202025.ogg" preload="metadata" crossorigin="anonymous"></audio>
         </a-assets>
         
-        <!-- Camera with enhanced movement controls -->
-        <a-entity camera look-controls="pointerLockEnabled: true" flight-controls="speed: 7; acceleration: 5; easing: 9" position="0 1.6 0" smooth-look-controls="dampingFactor: 1"></a-entity>
+        <!-- Camera with enhanced movement controls and object targeting -->
+        <a-entity 
+            camera 
+            look-controls="pointerLockEnabled: true" 
+            flight-controls="speed: 7; acceleration: 5; easing: 9" 
+            position="0 1.6 0" 
+            smooth-look-controls="dampingFactor: 1"
+            object-target>
+        </a-entity>
 
         <!-- Example Cube -->
         <a-box id="targetCube" position="0 0 -5" depth="1" height="0" width="0" color="none"></a-box>
         
         <!-- Add brightness control component to the scene -->
         <a-entity id="brightness-control-entity" brightness-control="brightness: 0.5; opacity: 1.0"></a-entity>
+        <a-entity id="sound-control-entity" sound-control="volume: 1.0; muted: false"></a-entity>
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -359,8 +430,9 @@
         document.getElementById('startButton').addEventListener('click', function () {
             // Hide intro overlay
             document.getElementById('intro-overlay').style.display = 'none';
-            // Show brightness controls
+            // Show brightness controls and how-it-works panel
             document.getElementById('brightness-controls').style.display = 'block';
+            document.getElementById('how-it-works').style.display = 'block';
             
             var sceneEl = document.querySelector('a-scene');
             const primitives = ['box']; // Polyhedron types
@@ -416,15 +488,69 @@
         document.getElementById('brightness').addEventListener('input', function(e) {
             const value = e.target.value / 10; // Convert 0-10 to 0-1
             const brightnessControlEntity = document.getElementById('brightness-control-entity');
-            const opacityValue = document.getElementById('opacity').value / 10;
-            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${value}; opacity: ${opacityValue}`);
+            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${value}`);
         });
-
-        document.getElementById('opacity').addEventListener('input', function(e) {
+        
+        // Set up volume control and mute button
+        let soundControlEntity;
+        let isMuted = false;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create the sound control entity
+            soundControlEntity = document.createElement('a-entity');
+            soundControlEntity.setAttribute('id', 'sound-control-entity');
+            soundControlEntity.setAttribute('sound-control', 'volume: 1.0; muted: false');
+            document.querySelector('a-scene').appendChild(soundControlEntity);
+        });
+        
+        document.getElementById('volume').addEventListener('input', function(e) {
             const value = e.target.value / 10; // Convert 0-10 to 0-1
-            const brightnessControlEntity = document.getElementById('brightness-control-entity');
-            const brightnessValue = document.getElementById('brightness').value / 10;
-            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${brightnessValue}; opacity: ${value}`);
+            if (soundControlEntity) {
+                soundControlEntity.setAttribute('sound-control', `volume: ${value}; muted: ${isMuted}`);
+            }
+        });
+        
+        document.getElementById('muteButton').addEventListener('click', function() {
+            isMuted = !isMuted;
+            if (soundControlEntity) {
+                const volumeValue = document.getElementById('volume').value / 10;
+                soundControlEntity.setAttribute('sound-control', `volume: ${volumeValue}; muted: ${isMuted}`);
+            }
+            
+            // Update button style and text
+            if (isMuted) {
+                this.textContent = 'UNMUTE ALL';
+                this.classList.add('muted');
+            } else {
+                this.textContent = 'MUTE ALL';
+                this.classList.remove('muted');
+            }
+        });
+            document.querySelector('a-scene').appendChild(soundControlEntity);
+        });
+        
+        document.getElementById('volume').addEventListener('input', function(e) {
+            const value = e.target.value / 10; // Convert 0-10 to 0-1
+            if (soundControlEntity) {
+                soundControlEntity.setAttribute('sound-control', `volume: ${value}; muted: ${isMuted}`);
+            }
+        });
+        
+        document.getElementById('muteButton').addEventListener('click', function() {
+            isMuted = !isMuted;
+            if (soundControlEntity) {
+                const volumeValue = document.getElementById('volume').value / 10;
+                soundControlEntity.setAttribute('sound-control', `volume: ${volumeValue}; muted: ${isMuted}`);
+            }
+            
+            // Update button style and text
+            if (isMuted) {
+                this.textContent = 'UNMUTE';
+                this.classList.add('muted');
+            } else {
+                this.textContent = 'MUTE';
+                this.classList.remove('muted');
+            }
         });
 
         AFRAME.registerComponent('smooth-look-controls', {
