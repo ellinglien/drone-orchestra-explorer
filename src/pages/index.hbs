@@ -189,6 +189,7 @@
     </style>
   
     <script>
+        // Register components when A-Frame is ready
         AFRAME.registerComponent('flight-controls', {
             schema: {
                 speed: {type: 'number', default: 10},
@@ -242,7 +243,7 @@
                 muted: {type: 'boolean', default: false}
             },
             init: function() {
-                this.audioElements = Array.from(document.querySelectorAll('audio'));
+                this.audioElements = [];
                 this.previousVolume = 1.0;
                 
                 // Apply initial volume settings
@@ -250,13 +251,20 @@
             },
             updateVolume: function() {
                 const data = this.data;
+                // Get fresh list of audio elements
                 this.audioElements = Array.from(document.querySelectorAll('audio'));
                 
                 this.audioElements.forEach(audio => {
                     if (data.muted) {
                         audio.volume = 0;
+                        if (audio.paused === false) {
+                            audio.pause();
+                        }
                     } else {
                         audio.volume = data.volume;
+                        if (audio.paused && audio.getAttribute('autoplay') !== null) {
+                            audio.play().catch(e => console.error("Error playing audio:", e));
+                        }
                     }
                 });
             },
@@ -265,10 +273,120 @@
             }
         });
 
+        // Object targeting and individual muting
+        AFRAME.registerComponent('object-target', {
+            schema: {
+                active: {type: 'boolean', default: false}
+            },
+            init: function() {
+                this.camera = document.querySelector('[camera]');
+                this.raycaster = new THREE.Raycaster();
+                this.mouse = new THREE.Vector2();
+                this.targetReticle = document.createElement('div');
+                this.targetReticle.id = 'target-reticle';
+                document.body.appendChild(this.targetReticle);
+                
+                this.targetInfo = document.createElement('div');
+                this.targetInfo.id = 'target-info';
+                document.body.appendChild(this.targetInfo);
+                
+                this.currentTarget = null;
+                
+                // Listen for spacebar to mute/unmute individual object
+                window.addEventListener('keydown', this.onKeyDown.bind(this));
+                
+                // Track pointer lock state
+                document.addEventListener('pointerlockchange', this.onPointerLockChange.bind(this));
+            },
+            onPointerLockChange: function() {
+                if (document.pointerLockElement) {
+                    document.getElementById('click-instructions').style.display = 'none';
+                } else {
+                    document.getElementById('click-instructions').style.display = 'block';
+                }
+            },
+            onKeyDown: function(event) {
+                if (event.code === 'Space' && this.currentTarget) {
+                    const soundComponent = this.currentTarget.components.sound;
+                    if (soundComponent) {
+                        if (soundComponent.isPlaying) {
+                            soundComponent.pauseSound();
+                            this.targetInfo.textContent = "MUTED (SPACE to unmute)";
+                        } else {
+                            soundComponent.playSound();
+                            this.targetInfo.textContent = "PLAYING (SPACE to mute)";
+                        }
+                    }
+                }
+            },
+            tick: function() {
+                if (!this.camera) return;
+                
+                // Create raycaster from camera
+                const direction = new THREE.Vector3(0, 0, -1);
+                direction.unproject(this.camera.object3D.children[0]);
+                this.raycaster.set(this.camera.object3D.position, direction.sub(this.camera.object3D.position).normalize());
+                
+                // Check for intersections with drone entities
+                const droneEntities = Array.from(document.querySelectorAll('.drone-entity'));
+                const meshes = droneEntities.map(entity => entity.object3D);
+                
+                // Filter only visible entities
+                const visibleMeshes = meshes.filter(mesh => {
+                    const polyhedron = mesh.el.querySelector('.drone-object');
+                    return polyhedron && polyhedron.getAttribute('visible') === 'true';
+                });
+                
+                if (visibleMeshes.length > 0) {
+                    const intersects = this.raycaster.intersectObjects(visibleMeshes, true);
+                    
+                    if (intersects.length > 0) {
+                        // Find the closest visible entity
+                        let closestEntity = null;
+                        let closestDistance = Infinity;
+                        
+                        for (const intersect of intersects) {
+                            const distance = intersect.distance;
+                            if (distance < closestDistance) {
+                                // Find the entity that owns this object
+                                let currentObj = intersect.object;
+                                while (currentObj.el && !currentObj.el.classList.contains('drone-entity')) {
+                                    currentObj = currentObj.parent;
+                                }
+                                
+                                if (currentObj.el && currentObj.el.classList.contains('drone-entity')) {
+                                    closestEntity = currentObj.el;
+                                    closestDistance = distance;
+                                }
+                            }
+                        }
+                        
+                        if (closestEntity) {
+                            this.targetReticle.classList.add('active');
+                            this.currentTarget = closestEntity;
+                            
+                            // Show info about mute status
+                            const soundComponent = closestEntity.components.sound;
+                            if (soundComponent) {
+                                this.targetInfo.textContent = soundComponent.isPlaying ? 
+                                    "PLAYING (SPACE to mute)" : "MUTED (SPACE to unmute)";
+                                this.targetInfo.style.display = 'block';
+                            }
+                            return;
+                        }
+                    }
+                }
+                
+                // No target
+                this.targetReticle.classList.remove('active');
+                this.currentTarget = null;
+                this.targetInfo.style.display = 'none';
+            }
+        });
+
         AFRAME.registerComponent('brightness-control', {
             schema: {
-                brightness: {type: 'number', default: 0.5},  
-                opacity: {type: 'number', default: 1.0}
+                brightness: {type: 'number', default: 0.5}
             },
             init: function() {
                 this.entities = [];
@@ -314,8 +432,9 @@
                         rgb.b = Math.floor(rgb.b * brightness);
                         
                         const color = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+                        const opacity = 1.0; // Now using fixed opacity
                         
-                        polyhedron.setAttribute('material', `color: ${color}; side: double; transparent: true; opacity: ${data.opacity}`);
+                        polyhedron.setAttribute('material', `color: ${color}; side: double; transparent: true; opacity: ${opacity}`);
                     }
                 });
             },
@@ -330,6 +449,32 @@
                 const b = bigint & 255;
                 
                 return { r, g, b };
+            }
+        });
+
+        AFRAME.registerComponent('smooth-look-controls', {
+            schema: {
+                dampingFactor: { type: 'number', default: 0.5 },
+                decayFactor: { type: 'number', default: 0.95 } // Control how quickly to reduce follow-through
+            },
+            init: function () {
+                this.targetRotation = new THREE.Quaternion();
+                this.currentRotation = new THREE.Quaternion();
+                this.decay = 1.0; // Start with no reduction in damping
+            },
+            tick: function (time, timeDelta) {
+                var data = this.data;
+                var obj3D = this.el.object3D;
+                var delta = (timeDelta / 1000) * data.dampingFactor * this.decay; // Apply decay to damping
+
+                // Update decay factor, reducing the damping effect over time
+                this.decay *= data.decayFactor;
+                this.decay = Math.max(this.decay, 0.1); // Ensure decay does not reduce damping below a minimum threshold
+
+                // Convert current and target to Quaternion to use slerp for smoothing
+                this.targetRotation.copy(obj3D.quaternion);
+                this.currentRotation.slerp(this.targetRotation, delta); // Spherical linear interpolation
+                obj3D.quaternion.copy(this.currentRotation);
             }
         });
     </script>
@@ -377,8 +522,7 @@
 
     <a-scene background="color: black">
         <a-assets>
-            <!-- Preload the audio files -->
-            <!-- Audio files setup for streaming with minimal preload -->
+            <!-- Preload the audio files with crossorigin attribute -->
             <audio id="drone1" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2Faudio%2FUSTAKNOW_ALIAS_CR05APR2025__CHAOS_DRONE_STEM__ForAprilREMDroneOrchestraCompilationMix_.ogg" preload="metadata" crossorigin="anonymous"></audio>
             <audio id="drone2" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2FHogardApr25dronebongo.ogg" preload="metadata" crossorigin="anonymous"></audio>
             <audio id="drone3" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/kerning%20man%20april%20chaos%20drone.ogg" preload="metadata" crossorigin="anonymous"></audio>
@@ -403,31 +547,70 @@
         </a-entity>
 
         <!-- Example Cube -->
-        <a-box id="targetCube" position="0 0 -5" depth="1" height="0" width="0" color="none"></a-box>
+        <a-box id="targetCube" position="0 0 -5" depth="1" height="0" width="0" material="color: black"></a-box>
         
         <!-- Add brightness control component to the scene -->
-        <a-entity id="brightness-control-entity" brightness-control="brightness: 0.5; opacity: 1.0"></a-entity>
+        <a-entity id="brightness-control-entity" brightness-control="brightness: 0.5"></a-entity>
         <a-entity id="sound-control-entity" sound-control="volume: 1.0; muted: false"></a-entity>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const cameraEl = document.querySelector('[camera]');
-                const cubeEl = document.getElementById('targetCube');
-
-                // Calculate a position for the camera: This positions the camera 10 units away from the cube, directly in front of it.
-                let cubePos = cubeEl.object3D.position;
-                let offset = new THREE.Vector3(0, 0, 10);  // You can adjust this vector to change the distance and angle.
-                let cameraPos = cubePos.clone().add(offset);
-
-                // Set the camera's position and orient it to look at the cube
-                cameraEl.setAttribute('position', cameraPos);
-                cameraEl.setAttribute('look-at', `#${cubeEl.id}`);
-            });
-        </script>
     </a-scene>
 
     <script>
-        document.getElementById('startButton').addEventListener('click', function () {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up start button
+            document.getElementById('startButton').addEventListener('click', startExperience);
+            
+            // Set up camera and targeting
+            const cameraEl = document.querySelector('[camera]');
+            const cubeEl = document.getElementById('targetCube');
+
+            // Calculate a position for the camera
+            let cubePos = cubeEl.object3D.position;
+            let offset = new THREE.Vector3(0, 0, 10);
+            let cameraPos = cubePos.clone().add(offset);
+
+            // Set the camera's position and orient it to look at the cube
+            cameraEl.setAttribute('position', cameraPos);
+            cameraEl.setAttribute('look-at', `#${cubeEl.id}`);
+        });
+        
+        // Set up brightness slider
+        document.getElementById('brightness').addEventListener('input', function(e) {
+            const value = e.target.value / 10; // Convert 0-10 to 0-1
+            const brightnessControlEntity = document.getElementById('brightness-control-entity');
+            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${value}`);
+        });
+        
+        // Set up volume control and mute button
+        let isMuted = false;
+        
+        document.getElementById('volume').addEventListener('input', function(e) {
+            const value = e.target.value / 10; // Convert 0-10 to 0-1
+            const soundControlEntity = document.getElementById('sound-control-entity');
+            if (soundControlEntity) {
+                soundControlEntity.setAttribute('sound-control', `volume: ${value}; muted: ${isMuted}`);
+            }
+        });
+        
+        document.getElementById('muteButton').addEventListener('click', function() {
+            isMuted = !isMuted;
+            const soundControlEntity = document.getElementById('sound-control-entity');
+            if (soundControlEntity) {
+                const volumeValue = document.getElementById('volume').value / 10;
+                soundControlEntity.setAttribute('sound-control', `volume: ${volumeValue}; muted: ${isMuted}`);
+            }
+            
+            // Update button style and text
+            if (isMuted) {
+                this.textContent = 'UNMUTE ALL';
+                this.classList.add('muted');
+            } else {
+                this.textContent = 'MUTE ALL';
+                this.classList.remove('muted');
+            }
+        });
+        
+        // Start experience function
+        function startExperience() {
             // Hide intro overlay
             document.getElementById('intro-overlay').style.display = 'none';
             // Show brightness controls and how-it-works panel
@@ -461,9 +644,6 @@
                 let initialRotation = {x: Math.random() * 360, y: Math.random() * 360, z: Math.random() * 360};
                 polyhedronEl.setAttribute('rotation', `${initialRotation.x} ${initialRotation.y} ${initialRotation.z}`);
 
-                let scaleMin = 0.8 + Math.random() * 0.7;
-                let scaleMax = 2.0 + Math.random();
-                let duration = 20000 + Math.random() * 4000;
                 let delay = i === randomImmediateIndex ? 0 : Math.random() * 100000 + 1000; // Immediate for the selected index, random delay for others
 
                 setTimeout(() => {
@@ -482,102 +662,7 @@
                 entityEl.appendChild(polyhedronEl);
                 sceneEl.appendChild(entityEl);
             }
-        });
-
-        // Set up brightness and opacity sliders
-        document.getElementById('brightness').addEventListener('input', function(e) {
-            const value = e.target.value / 10; // Convert 0-10 to 0-1
-            const brightnessControlEntity = document.getElementById('brightness-control-entity');
-            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${value}`);
-        });
-        
-        // Set up volume control and mute button
-        let soundControlEntity;
-        let isMuted = false;
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // Create the sound control entity
-            soundControlEntity = document.createElement('a-entity');
-            soundControlEntity.setAttribute('id', 'sound-control-entity');
-            soundControlEntity.setAttribute('sound-control', 'volume: 1.0; muted: false');
-            document.querySelector('a-scene').appendChild(soundControlEntity);
-        });
-        
-        document.getElementById('volume').addEventListener('input', function(e) {
-            const value = e.target.value / 10; // Convert 0-10 to 0-1
-            if (soundControlEntity) {
-                soundControlEntity.setAttribute('sound-control', `volume: ${value}; muted: ${isMuted}`);
-            }
-        });
-        
-        document.getElementById('muteButton').addEventListener('click', function() {
-            isMuted = !isMuted;
-            if (soundControlEntity) {
-                const volumeValue = document.getElementById('volume').value / 10;
-                soundControlEntity.setAttribute('sound-control', `volume: ${volumeValue}; muted: ${isMuted}`);
-            }
-            
-            // Update button style and text
-            if (isMuted) {
-                this.textContent = 'UNMUTE ALL';
-                this.classList.add('muted');
-            } else {
-                this.textContent = 'MUTE ALL';
-                this.classList.remove('muted');
-            }
-        });
-            document.querySelector('a-scene').appendChild(soundControlEntity);
-        });
-        
-        document.getElementById('volume').addEventListener('input', function(e) {
-            const value = e.target.value / 10; // Convert 0-10 to 0-1
-            if (soundControlEntity) {
-                soundControlEntity.setAttribute('sound-control', `volume: ${value}; muted: ${isMuted}`);
-            }
-        });
-        
-        document.getElementById('muteButton').addEventListener('click', function() {
-            isMuted = !isMuted;
-            if (soundControlEntity) {
-                const volumeValue = document.getElementById('volume').value / 10;
-                soundControlEntity.setAttribute('sound-control', `volume: ${volumeValue}; muted: ${isMuted}`);
-            }
-            
-            // Update button style and text
-            if (isMuted) {
-                this.textContent = 'UNMUTE';
-                this.classList.add('muted');
-            } else {
-                this.textContent = 'MUTE';
-                this.classList.remove('muted');
-            }
-        });
-
-        AFRAME.registerComponent('smooth-look-controls', {
-            schema: {
-                dampingFactor: { type: 'number', default: 0.5 },
-                decayFactor: { type: 'number', default: 0.95 } // Control how quickly to reduce follow-through
-            },
-            init: function () {
-                this.targetRotation = new THREE.Quaternion();
-                this.currentRotation = new THREE.Quaternion();
-                this.decay = 1.0; // Start with no reduction in damping
-            },
-            tick: function (time, timeDelta) {
-                var data = this.data;
-                var obj3D = this.el.object3D;
-                var delta = (timeDelta / 1000) * data.dampingFactor * this.decay; // Apply decay to damping
-
-                // Update decay factor, reducing the damping effect over time
-                this.decay *= data.decayFactor;
-                this.decay = Math.max(this.decay, 0.1); // Ensure decay does not reduce damping below a minimum threshold
-
-                // Convert current and target to Quaternion to use slerp for smoothing
-                this.targetRotation.copy(obj3D.quaternion);
-                this.currentRotation.slerp(this.targetRotation, delta); // Spherical linear interpolation
-                obj3D.quaternion.copy(this.currentRotation);
-            }
-        });
+        }
     </script>
 </body>
 </html>
