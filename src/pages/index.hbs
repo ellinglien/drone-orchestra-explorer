@@ -179,23 +179,80 @@
             },
             init: function() {
                 this.time = 0;
+                
+                // Calculate and set initial position immediately
+                this.updatePosition();
+                
+                // Delay physics application until component is initialized
+                setTimeout(() => {
+                    if (this.el.body) {
+                        const data = this.data;
+                        const pos = this.el.object3D.position;
+                        this.el.body.position.set(pos.x, pos.y, pos.z);
+                        
+                        // Apply initial velocity for smooth orbital motion
+                        const angle = data.azimuthalOffset;
+                        const speed = 0.3; // Initial velocity magnitude
+                        
+                        // Calculate tangential velocity for orbital motion
+                        const vx = -speed * Math.sin(angle) * data.direction;
+                        const vy = 0;
+                        const vz = speed * Math.cos(angle) * data.direction;
+                        
+                        this.el.body.velocity.set(vx, vy, vz);
+                    }
+                }, 100);
             },
             tick: function(time, timeDelta) {
                 const data = this.data;
                 this.time += timeDelta / 1000;
                 
-                // Calculate angle based on speed and direction
-                const angle = this.time * data.speed * data.direction + data.azimuthalOffset;
-                
-                // Calculate radius with eccentricity for elliptical orbits
+                // Apply orbital force through physics
+                if (this.el.body && this.el.body.position) {
+                    // Calculate desired orbital position
+                    const angle = this.time * data.speed * data.direction + data.azimuthalOffset;
+                    const radius = data.radius * (1 - data.eccentricity * Math.cos(angle));
+                    
+                    let x = radius * Math.cos(angle);
+                    let y = radius * Math.sin(angle);
+                    let z = 0;
+                    
+                    // Apply transformations
+                    const cosInc = Math.cos(data.inclination);
+                    const sinInc = Math.sin(data.inclination);
+                    const newY = y * cosInc - z * sinInc;
+                    const newZ = y * sinInc + z * cosInc;
+                    y = newY;
+                    z = newZ;
+                    
+                    const cosTilt = Math.cos(data.tilt);
+                    const sinTilt = Math.sin(data.tilt);
+                    const newX = x * cosTilt - z * sinTilt;
+                    const finalZ = x * sinTilt + z * cosTilt;
+                    x = newX;
+                    z = finalZ;
+                    
+                    const targetPos = new THREE.Vector3(x, y, z);
+                    const currentPos = new THREE.Vector3(this.el.body.position.x, this.el.body.position.y, this.el.body.position.z);
+                    const force = targetPos.clone().sub(currentPos).multiplyScalar(10); // Increased force strength
+                    
+                    // Apply force toward orbital position
+                    this.el.body.applyForce(
+                        new CANNON.Vec3(force.x, force.y, force.z),
+                        new CANNON.Vec3(currentPos.x, currentPos.y, currentPos.z)
+                    );
+                }
+            },
+            updatePosition: function() {
+                const data = this.data;
+                const angle = data.azimuthalOffset;
                 const radius = data.radius * (1 - data.eccentricity * Math.cos(angle));
                 
-                // Calculate position
                 let x = radius * Math.cos(angle);
                 let y = radius * Math.sin(angle);
                 let z = 0;
                 
-                // Apply inclination (tilt the orbit plane)
+                // Apply transformations
                 const cosInc = Math.cos(data.inclination);
                 const sinInc = Math.sin(data.inclination);
                 const newY = y * cosInc - z * sinInc;
@@ -203,7 +260,6 @@
                 y = newY;
                 z = newZ;
                 
-                // Apply orbital plane tilt
                 const cosTilt = Math.cos(data.tilt);
                 const sinTilt = Math.sin(data.tilt);
                 const newX = x * cosTilt - z * sinTilt;
@@ -240,7 +296,7 @@
         </div>
     </div>
 
-    <a-scene background="color: black">
+    <a-scene background="color: black" physics="gravity: 0; debug: false; friction: 0.1; restitution: 0.7">
         <a-assets>
             <!-- Preload the audio files -->
             <!-- Audio files setup for streaming with minimal preload -->
@@ -303,27 +359,18 @@
 
                 // Generate random orbital parameters for each drone
                 const radius = 3 + Math.random() * 7; // Orbit radius between 3 and 10
-                const speed = 0.05 + Math.random() * 0.1; // Speed of orbit
+                const speed = 0.01 + Math.random() * 0.02; // Much slower orbit speed
                 const inclination = Math.PI * (Math.random() * 0.5 - 0.25); // Inclination angle
                 const azimuthalOffset = Math.PI * 2 * Math.random(); // Starting position on orbit
                 const direction = Math.random() > 0.5 ? 1 : -1; // Random direction
                 const tilt = Math.PI * (Math.random() * 0.5 - 0.25); // Orbital plane tilt
                 const eccentricity = Math.random() * 0.3; // Elliptical orbit
 
-                // Apply orbital motion component
-                entityEl.setAttribute('orbital-motion', {
-                    radius: radius,
-                    speed: speed,
-                    inclination: inclination,
-                    azimuthalOffset: azimuthalOffset,
-                    direction: direction,
-                    tilt: tilt,
-                    eccentricity: eccentricity
-                });
+        
 
                 let primitiveType = primitives[Math.floor(Math.random() * primitives.length)];
                 let polyhedronEl = document.createElement('a-entity');
-                polyhedronEl.setAttribute('geometry', `primitive: ${primitiveType}; radius: 0.5; detail: 0`);
+                polyhedronEl.setAttribute('geometry', `primitive: ${primitiveType}; radius: 0.75; detail: 0`);
                 polyhedronEl.setAttribute('material', 'color: #1a0000; side: double; transparent: true; opacity: 0');
                 polyhedronEl.setAttribute('visible', 'false');
                 polyhedronEl.setAttribute('class', 'drone-object');
@@ -339,7 +386,10 @@
                 setTimeout(() => {
                     polyhedronEl.setAttribute('visible', 'true');
                     polyhedronEl.setAttribute('animation__opacity', `property: material.opacity; from: 0; to: 1; dur: 10000; easing: easeInOutQuad`);
-                    entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
+                    entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true; volume: 0.8`);
+                    
+                    // Add collision handling
+                    entityEl.setAttribute('collision-handler', '');
                     
                     // Update the brightness control to affect the new entity
                     let brightnessControlEntity = document.getElementById('brightness-control-entity');
@@ -367,6 +417,24 @@
             const brightnessControlEntity = document.getElementById('brightness-control-entity');
             const brightnessValue = document.getElementById('brightness').value / 10;
             brightnessControlEntity.setAttribute('brightness-control', `brightness: ${brightnessValue}; opacity: ${value}`);
+        });
+
+        // Create collision handler component
+        AFRAME.registerComponent('collision-handler', {
+            init: function() {
+                this.el.addEventListener('collide', function(e) {
+                    // Get the audio component
+                    const sound = this.components.sound;
+                    if (sound) {
+                        // Momentarily increase volume on collision
+                        const originalVolume = sound.data.volume;
+                        sound.data.volume = Math.min(originalVolume * 1.5, 2.0);
+                        setTimeout(() => {
+                            sound.data.volume = originalVolume;
+                        }, 300);
+                    }
+                });
+            }
         });
 
         AFRAME.registerComponent('smooth-look-controls', {
