@@ -165,6 +165,55 @@
                 });
             }
         });
+
+        // Create orbital animation component
+        AFRAME.registerComponent('orbital-motion', {
+            schema: {
+                radius: {type: 'number', default: 5},
+                speed: {type: 'number', default: 1},
+                inclination: {type: 'number', default: 0},
+                azimuthalOffset: {type: 'number', default: 0},
+                direction: {type: 'number', default: 1}, // 1 for counter-clockwise, -1 for clockwise
+                tilt: {type: 'number', default: 0}, // Orbital plane tilt
+                eccentricity: {type: 'number', default: 0} // Elliptical orbit (0 = circular)
+            },
+            init: function() {
+                this.time = 0;
+            },
+            tick: function(time, timeDelta) {
+                const data = this.data;
+                this.time += timeDelta / 1000;
+                
+                // Calculate angle based on speed and direction
+                const angle = this.time * data.speed * data.direction + data.azimuthalOffset;
+                
+                // Calculate radius with eccentricity for elliptical orbits
+                const radius = data.radius * (1 - data.eccentricity * Math.cos(angle));
+                
+                // Calculate position
+                let x = radius * Math.cos(angle);
+                let y = radius * Math.sin(angle);
+                let z = 0;
+                
+                // Apply inclination (tilt the orbit plane)
+                const cosInc = Math.cos(data.inclination);
+                const sinInc = Math.sin(data.inclination);
+                const newY = y * cosInc - z * sinInc;
+                const newZ = y * sinInc + z * cosInc;
+                y = newY;
+                z = newZ;
+                
+                // Apply orbital plane tilt
+                const cosTilt = Math.cos(data.tilt);
+                const sinTilt = Math.sin(data.tilt);
+                const newX = x * cosTilt - z * sinTilt;
+                const finalZ = x * sinTilt + z * cosTilt;
+                x = newX;
+                z = finalZ;
+                
+                this.el.setAttribute('position', `${x} ${y} ${z}`);
+            }
+        });
     </script>
 </head>
 <body>
@@ -247,16 +296,30 @@
             const randomImmediateIndex = Math.floor(Math.random() * numberOfEntities); // Select one random index for immediate load
 
             for (let i = 0; i < numberOfEntities; i++) {
-                let phi = Math.acos(2 * (i / numberOfEntities) - 1) - Math.PI / 2;
-                let theta = Math.sqrt(numberOfEntities * Math.PI) * phi;
-                let x = Math.cos(theta) * Math.cos(phi) * 5;
-                let y = Math.sin(phi) * 5;
-                let z = Math.sin(theta) * Math.cos(phi) * 5;
                 let audioId = `drone${i + 1}`;
 
                 let entityEl = document.createElement('a-entity');
-                entityEl.setAttribute('position', `${x} ${y} ${z}`);
                 entityEl.setAttribute('class', 'drone-entity');
+
+                // Generate random orbital parameters for each drone
+                const radius = 3 + Math.random() * 7; // Orbit radius between 3 and 10
+                const speed = 0.05 + Math.random() * 0.1; // Speed of orbit
+                const inclination = Math.PI * (Math.random() * 0.5 - 0.25); // Inclination angle
+                const azimuthalOffset = Math.PI * 2 * Math.random(); // Starting position on orbit
+                const direction = Math.random() > 0.5 ? 1 : -1; // Random direction
+                const tilt = Math.PI * (Math.random() * 0.5 - 0.25); // Orbital plane tilt
+                const eccentricity = Math.random() * 0.3; // Elliptical orbit
+
+                // Apply orbital motion component
+                entityEl.setAttribute('orbital-motion', {
+                    radius: radius,
+                    speed: speed,
+                    inclination: inclination,
+                    azimuthalOffset: azimuthalOffset,
+                    direction: direction,
+                    tilt: tilt,
+                    eccentricity: eccentricity
+                });
 
                 let primitiveType = primitives[Math.floor(Math.random() * primitives.length)];
                 let polyhedronEl = document.createElement('a-entity');
