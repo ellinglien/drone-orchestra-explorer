@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DRONE ORCHESTRA</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!-- Include A-Frame Extras for enhanced movement controls -->
+    <script src="https://unpkg.com/aframe-extras@6/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system/dist/aframe-physics-system.min.js"></script>
+    <script src="/js/month-selector.js"></script>
+    <script src="/js/drone-scene.js"></script>
+    <script src="/js/metadata-display.js"></script>
+
+    <script>
+        AFRAME.registerComponent('flight-controls', {
+            schema: {
+                speed: {type: 'number', default: 10},
+                acceleration: {type: 'number', default: 50},
+                easing: {type: 'number', default: 0.5}, // This controls the 'inertia' or 'momentum'
+                friction: {type: 'number', default: 0.15} // Friction for more responsive control
+            },
+            init: function() {
+                this.velocity = new THREE.Vector3(0, 0, 0);
+                this.direction = new THREE.Vector3(0, 0, 0);
+                this.keys = {};
+                // Bind handlers so we can remove them later
+                this.onKeyDownBound = (event) => this.onKeyDown(event);
+                this.onKeyUpBound = (event) => this.onKeyUp(event);
+                window.addEventListener('keydown', this.onKeyDownBound);
+                window.addEventListener('keyup', this.onKeyUpBound);
+            },
+            remove: function() {
+                // Clean up event listeners to prevent memory leaks
+                window.removeEventListener('keydown', this.onKeyDownBound);
+                window.removeEventListener('keyup', this.onKeyUpBound);
+            },
+            onKeyDown: function(event) {
+                this.keys[event.code] = true;
+            },
+            onKeyUp: function(event) {
+                this.keys[event.code] = false;
+            },
+            tick: function(time, timeDelta) {
+                const data = this.data;
+                const acceleration = new THREE.Vector3(0, 0, 0);
+                const cameraWorldQuaternion = new THREE.Quaternion();
+                this.el.object3D.getWorldQuaternion(cameraWorldQuaternion);
+
+                // Apply acceleration based on key press
+                if (this.keys['KeyW']) acceleration.z -= data.acceleration;
+                if (this.keys['KeyS']) acceleration.z += data.acceleration;
+                if (this.keys['KeyA']) acceleration.x -= data.acceleration;
+                if (this.keys['KeyD']) acceleration.x += data.acceleration;
+                acceleration.applyQuaternion(cameraWorldQuaternion);
+                acceleration.multiplyScalar(timeDelta / 1000);
+
+                // Update velocity with the new acceleration
+                this.velocity.add(acceleration);
+
+                // Apply friction to simulate momentum and zero gravity effect
+                this.velocity.multiplyScalar(1 - data.friction);
+
+                // Update position based on velocity
+                const positionDelta = this.velocity.clone().multiplyScalar(timeDelta / 1000);
+                this.el.object3D.position.add(positionDelta);
+            }
+        });
+
+        AFRAME.registerComponent('brightness-control', {
+            schema: {
+                brightness: {type: 'number', default: 0.5},
+                opacity: {type: 'number', default: 1.0}
+            },
+            init: function() {
+                this.cachedPolyhedrons = [];
+            },
+            refreshCache: function() {
+                // Only query DOM when entities change, not on every update
+                const entities = document.querySelectorAll('.drone-entity .drone-object');
+                this.cachedPolyhedrons = Array.from(entities);
+            },
+            update: function() {
+                const data = this.data;
+
+                // Refresh cache if empty (entities may have been added)
+                if (this.cachedPolyhedrons.length === 0) {
+                    this.refreshCache();
+                }
+
+                // Calculate color based on brightness - dim but visible
+                const brightness = data.brightness;
+                const r = Math.min(255, Math.floor(20 + brightness * 80));
+                const g = Math.min(255, Math.floor(brightness * 25));
+                const b = Math.min(255, Math.floor(brightness * 25));
+                const color = `rgb(${r}, ${g}, ${b})`;
+                const emissiveIntensity = 0.08 + brightness * 0.25;
+                const materialValue = `shader: standard; color: ${color}; emissive: ${color}; emissiveIntensity: ${emissiveIntensity}; metalness: 0.2; roughness: 0.8; side: double; transparent: true; opacity: ${data.opacity}`;
+
+                this.cachedPolyhedrons.forEach(polyhedron => {
+                    polyhedron.setAttribute('material', materialValue);
+                });
+            }
+        });
+
+        // Create orbital animation component
+        AFRAME.registerComponent('orbital-motion', {
+            schema: {
+                radius: {type: 'number', default: 5},
+                speed: {type: 'number', default: 1},
+                inclination: {type: 'number', default: 0},
+                azimuthalOffset: {type: 'number', default: 0},
+                direction: {type: 'number', default: 1}, // 1 for counter-clockwise, -1 for clockwise
+                tilt: {type: 'number', default: 0}, // Orbital plane tilt
+                eccentricity: {type: 'number', default: 0} // Elliptical orbit (0 = circular)
+            },
+            init: function() {
+                this.time = 0;
+            },
+            tick: function(time, timeDelta) {
+                const data = this.data;
+                this.time += timeDelta / 1000;
+                
+                // Calculate angle based on speed and direction
+                const angle = this.time * data.speed * data.direction + data.azimuthalOffset;
+                
+                // Calculate radius with eccentricity for elliptical orbits
+                const radius = data.radius * (1 - data.eccentricity * Math.cos(angle));
+                
+                // Calculate position (z negative = in front of camera)
+                let x = radius * Math.sin(angle);
+                let z = -radius * Math.cos(angle);
+                let y = 0;
+                
+                // Apply inclination (tilt orbit up/down)
+                const cosInc = Math.cos(data.inclination);
+                const sinInc = Math.sin(data.inclination);
+                const newY = z * sinInc;
+                const newZ = z * cosInc;
+                y = newY;
+                z = newZ;
+
+                // Apply orbital plane tilt (roll)
+                const cosTilt = Math.cos(data.tilt);
+                const sinTilt = Math.sin(data.tilt);
+                const tiltedY = y * cosTilt - x * sinTilt;
+                const tiltedX = y * sinTilt + x * cosTilt;
+                y = tiltedY;
+                x = tiltedX;
+
+                // Offset to camera height
+                y += 1.6;
+                
+                this.el.setAttribute('position', `${x} ${y} ${z}`);
+            }
+        });
+    </script>
+</head>
+<body>
+    <div id="intro-overlay">
+        <div id="title">DRONE ORCHESTRA</div>
+        <button id="startButton">THERE'S NO GOING BACK</button>
+        <div id="controls">
+            <p><strong>CONTROLS:</strong></p>
+            <p>MOVEMENT: W (forward), S (backward), A (left), D (right)</p>
+            <p>LOOK: Mouse to look around</p>
+            <p>BRIGHTNESS: Use sliders that appear at the bottom right after starting</p>
+            <p>For the full experience, use headphones.</p>
+        </div>
+    </div>
+
+    <div id="brightness-controls">
+        <div class="slider-container">
+            <label for="brightness">Brightness:</label>
+            <input type="range" id="brightness" min="0" max="10" value="4" step="0.1">
+        </div>
+        <div class="slider-container">
+            <label for="opacity">Opacity:</label>
+            <input type="range" id="opacity" min="0" max="10" value="10" step="0.1">
+        </div>
+    </div>
+
+    <a-scene background="color: black">
+        <a-assets>
+            <!-- Audio assets will be dynamically loaded by DroneScene controller -->
+        </a-assets>
+        
+        <!-- Lighting setup - dim but visible -->
+        <a-entity light="type: ambient; color: #220000; intensity: 0.2"></a-entity>
+        <a-entity light="type: point; color: #ff2200; intensity: 1.0; distance: 50; decay: 2" position="0 5 -5"></a-entity>
+        <a-entity light="type: point; color: #ff1100; intensity: 0.6; distance: 40; decay: 2" position="-10 -3 -8"></a-entity>
+
+        <!-- Camera with movement controls and attached light -->
+        <a-entity camera look-controls="pointerLockEnabled: true" flight-controls="speed: 7; acceleration: 5; easing: 9" position="0 1.6 0">
+            <a-entity light="type: point; color: #ff3311; intensity: 0.4; distance: 20; decay: 2"></a-entity>
+        </a-entity>
+
+        <!-- Massive planet below - like viewing from ISS -->
+        <a-sphere
+            position="0 -80 0"
+            radius="75"
+            segments-width="64"
+            segments-height="64"
+            material="shader: standard; color: #120600; emissive: #1a0800; emissiveIntensity: 0.2; metalness: 0.1; roughness: 0.9">
+        </a-sphere>
+
+        <!-- Atmospheric glow on planet horizon -->
+        <a-sphere
+            position="0 -80 0"
+            radius="76.5"
+            segments-width="32"
+            segments-height="32"
+            material="shader: flat; color: #ff2200; opacity: 0.1; transparent: true; side: back">
+        </a-sphere>
+
+        <!-- Planet illumination -->
+        <a-entity light="type: point; color: #ff3300; intensity: 0.6; distance: 70; decay: 1" position="0 -10 0"></a-entity>
+        <a-entity light="type: point; color: #ff2200; intensity: 0.3; distance: 50; decay: 1" position="30 -20 -20"></a-entity>
+
+        <!-- Add brightness control component to the scene -->
+        <a-entity id="brightness-control-entity" brightness-control="brightness: 0.4; opacity: 1.0"></a-entity>
+    </a-scene>
+
+    <script>
+        document.getElementById('startButton').addEventListener('click', function () {
+            // Hide intro overlay
+            document.getElementById('intro-overlay').style.display = 'none';
+            // Show brightness controls
+            document.getElementById('brightness-controls').style.display = 'block';
+
+            // Drones will be loaded dynamically when user selects a month
+            // The month selector overlay is already visible and awaiting interaction
+        });
+
+        // Throttle function to limit update frequency (16ms ≈ 60fps)
+        function throttle(fn, wait) {
+            let lastTime = 0;
+            return function(...args) {
+                const now = Date.now();
+                if (now - lastTime >= wait) {
+                    lastTime = now;
+                    fn.apply(this, args);
+                }
+            };
+        }
+
+        // Set up brightness and opacity sliders with throttling
+        const brightnessControlEntity = document.getElementById('brightness-control-entity');
+
+        const updateBrightness = throttle(function() {
+            const brightness = document.getElementById('brightness').value / 10;
+            const opacity = document.getElementById('opacity').value / 10;
+            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${brightness}; opacity: ${opacity}`);
+        }, 16);
+
+        document.getElementById('brightness').addEventListener('input', updateBrightness);
+        document.getElementById('opacity').addEventListener('input', updateBrightness);
+
+        AFRAME.registerComponent('smooth-look-controls', {
+            schema: {
+                dampingFactor: { type: 'number', default: 0.5 },
+                decayFactor: { type: 'number', default: 0.95 } // Control how quickly to reduce follow-through
+            },
+            init: function () {
+                this.targetRotation = new THREE.Quaternion();
+                this.currentRotation = new THREE.Quaternion();
+                this.decay = 1.0; // Start with no reduction in damping
+            },
+            tick: function (time, timeDelta) {
+                var data = this.data;
+                var obj3D = this.el.object3D;
+                var delta = (timeDelta / 1000) * data.dampingFactor * this.decay; // Apply decay to damping
+
+                // Update decay factor, reducing the damping effect over time
+                this.decay *= data.decayFactor;
+                this.decay = Math.max(this.decay, 0.1); // Ensure decay does not reduce damping below a minimum threshold
+
+                // Convert current and target to Quaternion to use slerp for smoothing
+                this.targetRotation.copy(obj3D.quaternion);
+                this.currentRotation.slerp(this.targetRotation, delta); // Spherical linear interpolation
+                obj3D.quaternion.copy(this.currentRotation);
+            }
+        });
+
+        // Initialize Drone Scene Controller and Month Selector on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize scene controller
+            const droneScene = new DroneScene();
+            if (!droneScene.init()) {
+                console.error('Failed to initialize DroneScene');
+                return;
+            }
+
+            // Initialize metadata display
+            const metadataDisplay = new MetadataDisplay();
+            metadataDisplay.init();
+
+            // Initialize month selector
+            const monthSelector = new MonthSelector();
+
+            // Connect month selector to scene controller and metadata display
+            monthSelector.onMonthSelected = function(month) {
+                console.log('Loading drones for:', month.id);
+                metadataDisplay.setMonth(month);
+                metadataDisplay.show();
+                droneScene.loadMonth(month);
+            };
+
+            // Connect change month button to show selector again
+            metadataDisplay.onChangeMonth = function() {
+                droneScene.clearDrones();
+                metadataDisplay.hide();
+                monthSelector.show();
+            };
+
+            // Initialize and show month selector
+            monthSelector.init();
+        });
+    </script>
+</body>
+</html>
