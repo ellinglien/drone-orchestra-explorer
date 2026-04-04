@@ -9,7 +9,8 @@
     <script src="https://unpkg.com/aframe-extras@6/dist/aframe-extras.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system/dist/aframe-physics-system.min.js"></script>
     <script src="/js/month-selector.js"></script>
-  
+    <script src="/js/drone-scene.js"></script>
+
     <script>
         AFRAME.registerComponent('flight-controls', {
             schema: {
@@ -180,18 +181,7 @@
 
     <a-scene background="color: black">
         <a-assets>
-            <!-- Preload audio files for faster playback startup -->
-            <audio id="drone1" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2Faudio%2FUSTAKNOW_ALIAS_CR05APR2025__CHAOS_DRONE_STEM__ForAprilREMDroneOrchestraCompilationMix_.ogg" preload="auto"></audio>
-            <audio id="drone2" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2FHogardApr25dronebongo.ogg" preload="auto"></audio>
-            <audio id="drone3" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/kerning%20man%20april%20chaos%20drone.ogg" preload="auto"></audio>
-            <audio id="drone4" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/ohnonotagain-april2025.ogg" preload="auto"></audio>
-            <audio id="drone5" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/AMUC-Chaotic-Drone-April-2025.ogg" preload="auto"></audio>
-            <audio id="drone6" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Kessler-Chaotic-Drone-April-2025.ogg" preload="auto"></audio>
-            <audio id="drone7" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/jai_DroneOrchestraAvril.ogg" preload="auto"></audio>
-            <audio id="drone8" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Metamere%20-%20Drone%20Orchestra%202025-04%20-%20MODOK.ogg" preload="auto"></audio>
-            <audio id="drone9" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Mikey%20-%20Drone%20Orchestra%20Apr%2025%20Chaos.ogg" preload="auto"></audio>
-            <audio id="drone10" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/CyberneticVoyagerApril2025Chaos.ogg" preload="auto"></audio>
-            <audio id="drone11" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Coyote%20Senate%20Drone%20Orchestra%20April%202025.ogg" preload="auto"></audio>
+            <!-- Audio assets will be dynamically loaded by DroneScene controller -->
         </a-assets>
         
         <!-- Lighting setup - dim but visible -->
@@ -236,69 +226,9 @@
             document.getElementById('intro-overlay').style.display = 'none';
             // Show brightness controls
             document.getElementById('brightness-controls').style.display = 'block';
-            
-            var sceneEl = document.querySelector('a-scene');
-            const primitives = ['box']; // Polyhedron types
-            const numberOfEntities = 10;
-            const randomImmediateIndex = Math.floor(Math.random() * numberOfEntities); // Select one random index for immediate load
 
-            for (let i = 0; i < numberOfEntities; i++) {
-                let audioId = `drone${i + 1}`;
-
-                let entityEl = document.createElement('a-entity');
-                entityEl.setAttribute('class', 'drone-entity');
-
-                // Orbital parameters - glacial movement like immense objects
-                const radius = (i === 0) ? 6 : 6 + Math.random() * 10;
-                const speed = 0.003 + Math.random() * 0.005; // Very slow, glacial drift
-                const inclination = Math.PI * (Math.random() * 0.3 - 0.15);
-                const azimuthalOffset = (i === 0) ? 0 : Math.PI * 2 * Math.random(); // First one directly in front (angle 0 = -z)
-                const direction = Math.random() > 0.5 ? 1 : -1;
-                const tilt = Math.PI * (Math.random() * 0.2 - 0.1);
-                const eccentricity = Math.random() * 0.15;
-
-                entityEl.setAttribute('orbital-motion', {
-                    radius: radius,
-                    speed: speed,
-                    inclination: inclination,
-                    azimuthalOffset: azimuthalOffset,
-                    direction: direction,
-                    tilt: tilt,
-                    eccentricity: eccentricity
-                });
-
-                let primitiveType = primitives[Math.floor(Math.random() * primitives.length)];
-                let polyhedronEl = document.createElement('a-entity');
-                polyhedronEl.setAttribute('geometry', `primitive: ${primitiveType}; radius: 0.5; detail: 0`);
-                polyhedronEl.setAttribute('material', 'shader: standard; color: #2a0800; emissive: #3a1000; emissiveIntensity: 0.25; metalness: 0.2; roughness: 0.8; side: double; transparent: true; opacity: 0');
-                polyhedronEl.setAttribute('visible', 'false');
-                polyhedronEl.setAttribute('class', 'drone-object');
-
-                let initialRotation = {x: Math.random() * 360, y: Math.random() * 360, z: Math.random() * 360};
-                polyhedronEl.setAttribute('rotation', `${initialRotation.x} ${initialRotation.y} ${initialRotation.z}`);
-
-                let scaleMin = 0.8 + Math.random() * 0.7;
-                let scaleMax = 2.0 + Math.random();
-                let duration = 20000 + Math.random() * 4000;
-                let delay = i === 0 ? 0 : Math.random() * 9000 + 1000; // First object immediate, others staggered
-
-                setTimeout(() => {
-                    polyhedronEl.setAttribute('visible', 'true');
-                    polyhedronEl.setAttribute('animation__opacity', `property: material.opacity; from: 0; to: 1; dur: 10000; easing: easeInOutQuad`);
-                    entityEl.setAttribute('sound', `src: #${audioId}; autoplay: true; positional: true; refDistance: 1; rolloffFactor: 1.5; loop: true;`);
-                    
-                    // Update the brightness control to affect the new entity
-                    let brightnessControlEntity = document.getElementById('brightness-control-entity');
-                    let component = brightnessControlEntity.components['brightness-control'];
-                    if (component) {
-                        component.refreshCache(); // Force cache update for new entity
-                        component.update();
-                    }
-                }, delay);
-
-                entityEl.appendChild(polyhedronEl);
-                sceneEl.appendChild(entityEl);
-            }
+            // Drones will be loaded dynamically when user selects a month
+            // The month selector overlay is already visible and awaiting interaction
         });
 
         // Throttle function to limit update frequency (16ms ≈ 60fps)
@@ -351,15 +281,22 @@
             }
         });
 
-        // Initialize Month Selector on page load
+        // Initialize Drone Scene Controller and Month Selector on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize scene controller
+            const droneScene = new DroneScene();
+            if (!droneScene.init()) {
+                console.error('Failed to initialize DroneScene');
+                return;
+            }
+
+            // Initialize month selector
             const monthSelector = new MonthSelector();
 
-            // Set callback for when month is selected
+            // Connect month selector to scene controller
             monthSelector.onMonthSelected = function(month) {
                 console.log('Loading drones for:', month.id);
-                // TODO: Call drone scene controller to load drones for selected month
-                // sceneController.loadMonth(month);
+                droneScene.loadMonth(month);
             };
 
             // Initialize and show month selector
