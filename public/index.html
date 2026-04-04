@@ -16,9 +16,9 @@
         AFRAME.registerComponent('flight-controls', {
             schema: {
                 speed: {type: 'number', default: 10},
-                acceleration: {type: 'number', default: 50},
+                acceleration: {type: 'number', default: 35},
                 easing: {type: 'number', default: 0.5}, // This controls the 'inertia' or 'momentum'
-                friction: {type: 'number', default: 0.15} // Friction for more responsive control
+                friction: {type: 'number', default: 0.08} // Lower = more drift/momentum
             },
             init: function() {
                 this.velocity = new THREE.Vector3(0, 0, 0);
@@ -191,7 +191,7 @@
         <a-entity light="type: point; color: #ff1100; intensity: 0.6; distance: 40; decay: 2" position="-10 -3 -8"></a-entity>
 
         <!-- Camera with movement controls and attached light -->
-        <a-entity camera look-controls="pointerLockEnabled: true" flight-controls="speed: 7; acceleration: 5; easing: 9" position="0 1.6 0">
+        <a-entity camera look-controls="pointerLockEnabled: true; touchEnabled: false; magicWindowTrackingEnabled: false; mouseEnabled: true; reverseMouseDrag: false" flight-controls position="0 1.6 0">
             <a-entity light="type: point; color: #ff3311; intensity: 0.4; distance: 20; decay: 2"></a-entity>
         </a-entity>
 

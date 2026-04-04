@@ -8,6 +8,7 @@ class MetadataDisplay {
     this.monthInfoEl = null;
     this.artistHoverEl = null;
     this.changeMonthBtn = null;
+    this.controlsHelpEl = null;
     this.currentMonth = null;
     this.onChangeMonth = null; // Callback for change month button
   }
@@ -40,6 +41,14 @@ class MetadataDisplay {
       }
     });
     document.body.appendChild(this.changeMonthBtn);
+
+    // Create controls help (bottom-left corner)
+    this.controlsHelpEl = document.createElement('div');
+    this.controlsHelpEl.id = 'controls-help';
+    this.controlsHelpEl.innerHTML = `
+      <span class="key">WASD</span> to move &nbsp;|&nbsp; <span class="key">Mouse</span> to look &nbsp;|&nbsp; <span class="key">ESC</span> to unlock pointer
+    `;
+    document.body.appendChild(this.controlsHelpEl);
 
     // Set up raycaster hover detection
     this.setupHoverDetection();
@@ -116,6 +125,7 @@ class MetadataDisplay {
   hide() {
     if (this.monthInfoEl) this.monthInfoEl.style.display = 'none';
     if (this.changeMonthBtn) this.changeMonthBtn.style.display = 'none';
+    if (this.controlsHelpEl) this.controlsHelpEl.style.display = 'none';
     this.hideArtist();
   }
 
@@ -125,6 +135,7 @@ class MetadataDisplay {
   show() {
     if (this.monthInfoEl) this.monthInfoEl.style.display = 'block';
     if (this.changeMonthBtn) this.changeMonthBtn.style.display = 'block';
+    if (this.controlsHelpEl) this.controlsHelpEl.style.display = 'block';
   }
 }
 
