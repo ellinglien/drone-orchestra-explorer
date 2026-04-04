@@ -1,6 +1,4 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "public",
   "headers": [
     {
       "source": "/data/(.*)",
@@ -32,12 +30,6 @@
           "value": "DENY"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/index.html"
     }
   ]
 }
