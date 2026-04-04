@@ -223,3 +223,80 @@ a-scene .a-loader {
 .months-list::-webkit-scrollbar-thumb:hover {
   background: #ff4500;
 }
+
+/* ========================================
+   METADATA DISPLAY
+   ======================================== */
+
+/* Metadata Overlay (Month Info - Top Right) */
+.metadata-overlay {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #330000;
+  padding: 1rem 1.5rem;
+  z-index: 1000;
+  font-family: monospace;
+  color: #fff;
+  min-width: 200px;
+}
+
+.metadata-overlay .month-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ff4500;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.metadata-overlay .month-theme {
+  color: #999;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.metadata-overlay .drone-count {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* Change Month Button (Top Left) */
+.change-month-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: #1a0000;
+  border: 2px solid #330000;
+  color: #ff4500;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.change-month-button:hover {
+  background: #330000;
+  border-color: #ff4500;
+  transform: translateX(-3px);
+}
+
+/* Artist Hover Label */
+.artist-label {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #ff4500;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  pointer-events: none;
+  z-index: 2000;
+  white-space: nowrap;
+}

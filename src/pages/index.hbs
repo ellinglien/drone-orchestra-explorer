@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system/dist/aframe-physics-system.min.js"></script>
     <script src="/js/month-selector.js"></script>
     <script src="/js/drone-scene.js"></script>
+    <script src="/js/metadata-display.js"></script>
 
     <script>
         AFRAME.registerComponent('flight-controls', {
@@ -290,13 +291,26 @@
                 return;
             }
 
+            // Initialize metadata display
+            const metadataDisplay = new MetadataDisplay();
+            metadataDisplay.init();
+
             // Initialize month selector
             const monthSelector = new MonthSelector();
 
-            // Connect month selector to scene controller
+            // Connect month selector to scene controller and metadata display
             monthSelector.onMonthSelected = function(month) {
                 console.log('Loading drones for:', month.id);
+                metadataDisplay.setMonth(month);
+                metadataDisplay.show();
                 droneScene.loadMonth(month);
+            };
+
+            // Connect change month button to show selector again
+            metadataDisplay.onChangeMonth = function() {
+                droneScene.clearDrones();
+                metadataDisplay.hide();
+                monthSelector.show();
             };
 
             // Initialize and show month selector
