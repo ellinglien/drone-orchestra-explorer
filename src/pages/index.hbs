@@ -8,6 +8,7 @@
     <!-- Include A-Frame Extras for enhanced movement controls -->
     <script src="https://unpkg.com/aframe-extras@6/dist/aframe-extras.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system/dist/aframe-physics-system.min.js"></script>
+    <script src="/js/month-selector.js"></script>
   
     <script>
         AFRAME.registerComponent('flight-controls', {
@@ -348,6 +349,21 @@
                 this.currentRotation.slerp(this.targetRotation, delta); // Spherical linear interpolation
                 obj3D.quaternion.copy(this.currentRotation);
             }
+        });
+
+        // Initialize Month Selector on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const monthSelector = new MonthSelector();
+
+            // Set callback for when month is selected
+            monthSelector.onMonthSelected = function(month) {
+                console.log('Loading drones for:', month.id);
+                // TODO: Call drone scene controller to load drones for selected month
+                // sceneController.loadMonth(month);
+            };
+
+            // Initialize and show month selector
+            monthSelector.init();
         });
     </script>
 </body>
