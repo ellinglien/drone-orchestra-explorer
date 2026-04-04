@@ -143,6 +143,29 @@ input[type="range"]:hover::-moz-range-thumb {
     font-weight: bold;
 }
 
+/* ---- FULLSCREEN BUTTON ---- */
+#fullscreen-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #1a0000;
+    border: 2px solid #330000;
+    color: #ff4500;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 1.2rem;
+    transition: all 0.2s ease;
+    z-index: 1000;
+    display: none;
+}
+
+#fullscreen-btn:hover {
+    background: #330000;
+    border-color: #ff4500;
+    transform: scale(1.1);
+}
+
 /* ---- A-FRAME OVERRIDES ---- */
 .a-loader-title {
     background-color: #000 !important;

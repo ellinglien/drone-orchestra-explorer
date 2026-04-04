@@ -9,6 +9,7 @@ class MetadataDisplay {
     this.artistHoverEl = null;
     this.changeMonthBtn = null;
     this.controlsHelpEl = null;
+    this.fullscreenBtn = null;
     this.currentMonth = null;
     this.onChangeMonth = null; // Callback for change month button
   }
@@ -49,6 +50,21 @@ class MetadataDisplay {
       <span class="key">WASD</span> to move &nbsp;|&nbsp; <span class="key">Mouse</span> to look &nbsp;|&nbsp; <span class="key">ESC</span> to unlock pointer
     `;
     document.body.appendChild(this.controlsHelpEl);
+
+    // Create fullscreen button (bottom-right corner)
+    this.fullscreenBtn = document.createElement('button');
+    this.fullscreenBtn.id = 'fullscreen-btn';
+    this.fullscreenBtn.innerHTML = '⛶';
+    this.fullscreenBtn.title = 'Toggle Fullscreen';
+    this.fullscreenBtn.addEventListener('click', () => {
+      this.toggleFullscreen();
+    });
+    document.body.appendChild(this.fullscreenBtn);
+
+    // Update fullscreen button on fullscreen change
+    document.addEventListener('fullscreenchange', () => {
+      this.updateFullscreenButton();
+    });
 
     // Set up raycaster hover detection
     this.setupHoverDetection();
@@ -120,12 +136,43 @@ class MetadataDisplay {
   }
 
   /**
+   * Toggle fullscreen mode
+   */
+  toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      // Enter fullscreen
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error('Error entering fullscreen:', err);
+      });
+    } else {
+      // Exit fullscreen
+      document.exitFullscreen();
+    }
+  }
+
+  /**
+   * Update fullscreen button icon
+   */
+  updateFullscreenButton() {
+    if (this.fullscreenBtn) {
+      if (document.fullscreenElement) {
+        this.fullscreenBtn.innerHTML = '⛶'; // Exit fullscreen icon (same, but semantically represents toggle)
+        this.fullscreenBtn.title = 'Exit Fullscreen';
+      } else {
+        this.fullscreenBtn.innerHTML = '⛶'; // Enter fullscreen icon
+        this.fullscreenBtn.title = 'Toggle Fullscreen';
+      }
+    }
+  }
+
+  /**
    * Hide all metadata (when returning to month selector)
    */
   hide() {
     if (this.monthInfoEl) this.monthInfoEl.style.display = 'none';
     if (this.changeMonthBtn) this.changeMonthBtn.style.display = 'none';
     if (this.controlsHelpEl) this.controlsHelpEl.style.display = 'none';
+    if (this.fullscreenBtn) this.fullscreenBtn.style.display = 'none';
     this.hideArtist();
   }
 
@@ -136,6 +183,7 @@ class MetadataDisplay {
     if (this.monthInfoEl) this.monthInfoEl.style.display = 'block';
     if (this.changeMonthBtn) this.changeMonthBtn.style.display = 'block';
     if (this.controlsHelpEl) this.controlsHelpEl.style.display = 'block';
+    if (this.fullscreenBtn) this.fullscreenBtn.style.display = 'block';
   }
 }
 
