@@ -3,91 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>DRONE ORCHESTRA</title>
+    <link rel="stylesheet" href="/styles/main.css">
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <!-- Include A-Frame Extras for enhanced movement controls -->
     <script src="https://unpkg.com/aframe-extras@6/dist/aframe-extras.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system/dist/aframe-physics-system.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        #intro-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        
-        #title {
-            font-size: 80px;
-            font-weight: bold;
-            color: #FFF;
-            margin-bottom: 60px;
-            text-align: center;
-            letter-spacing: 10px;
-        }
-        
-        #startButton {
-            padding: 15px 30px;
-            font-size: 18px;
-            background-color: #330000;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        #startButton:hover {
-            background-color: #990000;
-            transform: scale(1.05);
-        }
-        
-        #controls {
-            color: white;
-            margin-top: 40px;
-            text-align: center;
-            max-width: 600px;
-            line-height: 1.6;
-        }
-        
-        #brightness-controls {
-            position: absolute;
-            z-index: 9998;
-            bottom: 20px;
-            right: 20px;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 10px;
-            border-radius: 5px;
-            color: white;
-            display: none;
-        }
-        
-        .slider-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .slider-container label {
-            margin-right: 10px;
-            width: 100px;
-        }
-        
-        input[type="range"] {
-            width: 150px;
-        }
-    </style>
   
     <script>
         AFRAME.registerComponent('flight-controls', {
@@ -95,14 +15,22 @@
                 speed: {type: 'number', default: 10},
                 acceleration: {type: 'number', default: 50},
                 easing: {type: 'number', default: 0.5}, // This controls the 'inertia' or 'momentum'
-                friction: {type: 'number', default: 0.05} // Friction to slowly stop the movement
+                friction: {type: 'number', default: 0.15} // Friction for more responsive control
             },
             init: function() {
                 this.velocity = new THREE.Vector3(0, 0, 0);
                 this.direction = new THREE.Vector3(0, 0, 0);
                 this.keys = {};
-                window.addEventListener('keydown', (event) => this.onKeyDown(event));
-                window.addEventListener('keyup', (event) => this.onKeyUp(event));
+                // Bind handlers so we can remove them later
+                this.onKeyDownBound = (event) => this.onKeyDown(event);
+                this.onKeyUpBound = (event) => this.onKeyUp(event);
+                window.addEventListener('keydown', this.onKeyDownBound);
+                window.addEventListener('keyup', this.onKeyUpBound);
+            },
+            remove: function() {
+                // Clean up event listeners to prevent memory leaks
+                window.removeEventListener('keydown', this.onKeyDownBound);
+                window.removeEventListener('keyup', this.onKeyUpBound);
             },
             onKeyDown: function(event) {
                 this.keys[event.code] = true;
@@ -138,30 +66,36 @@
 
         AFRAME.registerComponent('brightness-control', {
             schema: {
-                brightness: {type: 'number', default: 0.5},  
+                brightness: {type: 'number', default: 0.5},
                 opacity: {type: 'number', default: 1.0}
             },
             init: function() {
-                this.entities = [];
+                this.cachedPolyhedrons = [];
+            },
+            refreshCache: function() {
+                // Only query DOM when entities change, not on every update
+                const entities = document.querySelectorAll('.drone-entity .drone-object');
+                this.cachedPolyhedrons = Array.from(entities);
             },
             update: function() {
                 const data = this.data;
-                const entities = document.querySelectorAll('.drone-entity');
-                
-                this.entities = Array.from(entities);
-                
-                this.entities.forEach(entity => {
-                    const polyhedron = entity.querySelector('.drone-object');
-                    if (polyhedron) {
-                        // Calculate color based on brightness
-                        const brightness = data.brightness;
-                        const r = Math.floor(26 + brightness * 100);
-                        const g = Math.floor(0 + brightness * 30);
-                        const b = Math.floor(0 + brightness * 30);
-                        const color = `rgb(${r}, ${g}, ${b})`;
-                        
-                        polyhedron.setAttribute('material', `color: ${color}; side: double; transparent: true; opacity: ${data.opacity}`);
-                    }
+
+                // Refresh cache if empty (entities may have been added)
+                if (this.cachedPolyhedrons.length === 0) {
+                    this.refreshCache();
+                }
+
+                // Calculate color based on brightness - dim but visible
+                const brightness = data.brightness;
+                const r = Math.min(255, Math.floor(20 + brightness * 80));
+                const g = Math.min(255, Math.floor(brightness * 25));
+                const b = Math.min(255, Math.floor(brightness * 25));
+                const color = `rgb(${r}, ${g}, ${b})`;
+                const emissiveIntensity = 0.08 + brightness * 0.25;
+                const materialValue = `shader: standard; color: ${color}; emissive: ${color}; emissiveIntensity: ${emissiveIntensity}; metalness: 0.2; roughness: 0.8; side: double; transparent: true; opacity: ${data.opacity}`;
+
+                this.cachedPolyhedrons.forEach(polyhedron => {
+                    polyhedron.setAttribute('material', materialValue);
                 });
             }
         });
@@ -190,26 +124,29 @@
                 // Calculate radius with eccentricity for elliptical orbits
                 const radius = data.radius * (1 - data.eccentricity * Math.cos(angle));
                 
-                // Calculate position
-                let x = radius * Math.cos(angle);
-                let y = radius * Math.sin(angle);
-                let z = 0;
+                // Calculate position (z negative = in front of camera)
+                let x = radius * Math.sin(angle);
+                let z = -radius * Math.cos(angle);
+                let y = 0;
                 
-                // Apply inclination (tilt the orbit plane)
+                // Apply inclination (tilt orbit up/down)
                 const cosInc = Math.cos(data.inclination);
                 const sinInc = Math.sin(data.inclination);
-                const newY = y * cosInc - z * sinInc;
-                const newZ = y * sinInc + z * cosInc;
+                const newY = z * sinInc;
+                const newZ = z * cosInc;
                 y = newY;
                 z = newZ;
-                
-                // Apply orbital plane tilt
+
+                // Apply orbital plane tilt (roll)
                 const cosTilt = Math.cos(data.tilt);
                 const sinTilt = Math.sin(data.tilt);
-                const newX = x * cosTilt - z * sinTilt;
-                const finalZ = x * sinTilt + z * cosTilt;
-                x = newX;
-                z = finalZ;
+                const tiltedY = y * cosTilt - x * sinTilt;
+                const tiltedX = y * sinTilt + x * cosTilt;
+                y = tiltedY;
+                x = tiltedX;
+
+                // Offset to camera height
+                y += 1.6;
                 
                 this.el.setAttribute('position', `${x} ${y} ${z}`);
             }
@@ -232,7 +169,7 @@
     <div id="brightness-controls">
         <div class="slider-container">
             <label for="brightness">Brightness:</label>
-            <input type="range" id="brightness" min="0" max="10" value="5" step="0.1">
+            <input type="range" id="brightness" min="0" max="10" value="4" step="0.1">
         </div>
         <div class="slider-container">
             <label for="opacity">Opacity:</label>
@@ -242,45 +179,54 @@
 
     <a-scene background="color: black">
         <a-assets>
-            <!-- Preload the audio files -->
-            <!-- Audio files setup for streaming with minimal preload -->
-            <audio id="drone1" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2Faudio%2FUSTAKNOW_ALIAS_CR05APR2025__CHAOS_DRONE_STEM__ForAprilREMDroneOrchestraCompilationMix_.ogg" preload="metadata"></audio>
-            <audio id="drone2" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2FHogardApr25dronebongo.ogg" preload="metadata"></audio>
-            <audio id="drone3" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/kerning%20man%20april%20chaos%20drone.ogg" preload="metadata"></audio>
-            <audio id="drone4" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/ohnonotagain-april2025.ogg" preload="metadata"></audio>
-            <audio id="drone5" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/AMUC-Chaotic-Drone-April-2025.ogg" preload="metadata"></audio>
-            <audio id="drone6" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Kessler-Chaotic-Drone-April-2025.ogg" preload="metadata"></audio>
-            <audio id="drone7" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/jai_DroneOrchestraAvril.ogg" preload="metadata"></audio>
-            <audio id="drone8" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Metamere%20-%20Drone%20Orchestra%202025-04%20-%20MODOK.ogg" preload="metadata"></audio>
-            <audio id="drone9" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Mikey%20-%20Drone%20Orchestra%20Apr%2025%20Chaos.ogg" preload="metadata"></audio>
-            <audio id="drone10" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/CyberneticVoyagerApril2025Chaos.ogg" preload="metadata"></audio>
-            <audio id="drone11" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Coyote%20Senate%20Drone%20Orchestra%20April%202025.ogg" preload="metadata"></audio>
+            <!-- Preload audio files for faster playback startup -->
+            <audio id="drone1" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2Faudio%2FUSTAKNOW_ALIAS_CR05APR2025__CHAOS_DRONE_STEM__ForAprilREMDroneOrchestraCompilationMix_.ogg" preload="auto"></audio>
+            <audio id="drone2" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/public%2FHogardApr25dronebongo.ogg" preload="auto"></audio>
+            <audio id="drone3" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/kerning%20man%20april%20chaos%20drone.ogg" preload="auto"></audio>
+            <audio id="drone4" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/ohnonotagain-april2025.ogg" preload="auto"></audio>
+            <audio id="drone5" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/AMUC-Chaotic-Drone-April-2025.ogg" preload="auto"></audio>
+            <audio id="drone6" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Kessler-Chaotic-Drone-April-2025.ogg" preload="auto"></audio>
+            <audio id="drone7" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/jai_DroneOrchestraAvril.ogg" preload="auto"></audio>
+            <audio id="drone8" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Metamere%20-%20Drone%20Orchestra%202025-04%20-%20MODOK.ogg" preload="auto"></audio>
+            <audio id="drone9" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Mikey%20-%20Drone%20Orchestra%20Apr%2025%20Chaos.ogg" preload="auto"></audio>
+            <audio id="drone10" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/CyberneticVoyagerApril2025Chaos.ogg" preload="auto"></audio>
+            <audio id="drone11" src="https://cdn.glitch.global/01909728-80f3-4f8c-96f4-8e8d054cfc08/Coyote%20Senate%20Drone%20Orchestra%20April%202025.ogg" preload="auto"></audio>
         </a-assets>
         
-        <!-- Camera with enhanced movement controls -->
-        <a-entity camera look-controls="pointerLockEnabled: true" flight-controls="speed: 7; acceleration: 5; easing: 9" position="0 1.6 0" smooth-look-controls="dampingFactor: 1"></a-entity>
+        <!-- Lighting setup - dim but visible -->
+        <a-entity light="type: ambient; color: #220000; intensity: 0.2"></a-entity>
+        <a-entity light="type: point; color: #ff2200; intensity: 1.0; distance: 50; decay: 2" position="0 5 -5"></a-entity>
+        <a-entity light="type: point; color: #ff1100; intensity: 0.6; distance: 40; decay: 2" position="-10 -3 -8"></a-entity>
 
-        <!-- Example Cube -->
-        <a-box id="targetCube" position="0 0 -5" depth="1" height="0" width="0" color="none"></a-box>
-        
+        <!-- Camera with movement controls and attached light -->
+        <a-entity camera look-controls="pointerLockEnabled: true" flight-controls="speed: 7; acceleration: 5; easing: 9" position="0 1.6 0">
+            <a-entity light="type: point; color: #ff3311; intensity: 0.4; distance: 20; decay: 2"></a-entity>
+        </a-entity>
+
+        <!-- Massive planet below - like viewing from ISS -->
+        <a-sphere
+            position="0 -80 0"
+            radius="75"
+            segments-width="64"
+            segments-height="64"
+            material="shader: standard; color: #120600; emissive: #1a0800; emissiveIntensity: 0.2; metalness: 0.1; roughness: 0.9">
+        </a-sphere>
+
+        <!-- Atmospheric glow on planet horizon -->
+        <a-sphere
+            position="0 -80 0"
+            radius="76.5"
+            segments-width="32"
+            segments-height="32"
+            material="shader: flat; color: #ff2200; opacity: 0.1; transparent: true; side: back">
+        </a-sphere>
+
+        <!-- Planet illumination -->
+        <a-entity light="type: point; color: #ff3300; intensity: 0.6; distance: 70; decay: 1" position="0 -10 0"></a-entity>
+        <a-entity light="type: point; color: #ff2200; intensity: 0.3; distance: 50; decay: 1" position="30 -20 -20"></a-entity>
+
         <!-- Add brightness control component to the scene -->
-        <a-entity id="brightness-control-entity" brightness-control="brightness: 0.5; opacity: 1.0"></a-entity>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const cameraEl = document.querySelector('[camera]');
-                const cubeEl = document.getElementById('targetCube');
-
-                // Calculate a position for the camera: This positions the camera 10 units away from the cube, directly in front of it.
-                let cubePos = cubeEl.object3D.position;
-                let offset = new THREE.Vector3(0, 0, 10);  // You can adjust this vector to change the distance and angle.
-                let cameraPos = cubePos.clone().add(offset);
-
-                // Set the camera's position and orient it to look at the cube
-                cameraEl.setAttribute('position', cameraPos);
-                cameraEl.setAttribute('look-at', `#${cubeEl.id}`);
-            });
-        </script>
+        <a-entity id="brightness-control-entity" brightness-control="brightness: 0.4; opacity: 1.0"></a-entity>
     </a-scene>
 
     <script>
@@ -301,16 +247,15 @@
                 let entityEl = document.createElement('a-entity');
                 entityEl.setAttribute('class', 'drone-entity');
 
-                // Generate random orbital parameters for each drone
-                const radius = 3 + Math.random() * 7; // Orbit radius between 3 and 10
-                const speed = 0.05 + Math.random() * 0.1; // Speed of orbit
-                const inclination = Math.PI * (Math.random() * 0.5 - 0.25); // Inclination angle
-                const azimuthalOffset = Math.PI * 2 * Math.random(); // Starting position on orbit
-                const direction = Math.random() > 0.5 ? 1 : -1; // Random direction
-                const tilt = Math.PI * (Math.random() * 0.5 - 0.25); // Orbital plane tilt
-                const eccentricity = Math.random() * 0.3; // Elliptical orbit
+                // Orbital parameters - glacial movement like immense objects
+                const radius = (i === 0) ? 6 : 6 + Math.random() * 10;
+                const speed = 0.003 + Math.random() * 0.005; // Very slow, glacial drift
+                const inclination = Math.PI * (Math.random() * 0.3 - 0.15);
+                const azimuthalOffset = (i === 0) ? 0 : Math.PI * 2 * Math.random(); // First one directly in front (angle 0 = -z)
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                const tilt = Math.PI * (Math.random() * 0.2 - 0.1);
+                const eccentricity = Math.random() * 0.15;
 
-                // Apply orbital motion component
                 entityEl.setAttribute('orbital-motion', {
                     radius: radius,
                     speed: speed,
@@ -324,7 +269,7 @@
                 let primitiveType = primitives[Math.floor(Math.random() * primitives.length)];
                 let polyhedronEl = document.createElement('a-entity');
                 polyhedronEl.setAttribute('geometry', `primitive: ${primitiveType}; radius: 0.5; detail: 0`);
-                polyhedronEl.setAttribute('material', 'color: #1a0000; side: double; transparent: true; opacity: 0');
+                polyhedronEl.setAttribute('material', 'shader: standard; color: #2a0800; emissive: #3a1000; emissiveIntensity: 0.25; metalness: 0.2; roughness: 0.8; side: double; transparent: true; opacity: 0');
                 polyhedronEl.setAttribute('visible', 'false');
                 polyhedronEl.setAttribute('class', 'drone-object');
 
@@ -334,7 +279,7 @@
                 let scaleMin = 0.8 + Math.random() * 0.7;
                 let scaleMax = 2.0 + Math.random();
                 let duration = 20000 + Math.random() * 4000;
-                let delay = i === randomImmediateIndex ? 0 : Math.random() * 100000 + 1000; // Immediate for the selected index, random delay for others
+                let delay = i === 0 ? 0 : Math.random() * 9000 + 1000; // First object immediate, others staggered
 
                 setTimeout(() => {
                     polyhedronEl.setAttribute('visible', 'true');
@@ -345,6 +290,7 @@
                     let brightnessControlEntity = document.getElementById('brightness-control-entity');
                     let component = brightnessControlEntity.components['brightness-control'];
                     if (component) {
+                        component.refreshCache(); // Force cache update for new entity
                         component.update();
                     }
                 }, delay);
@@ -354,20 +300,29 @@
             }
         });
 
-        // Set up brightness and opacity sliders
-        document.getElementById('brightness').addEventListener('input', function(e) {
-            const value = e.target.value / 10; // Convert 0-10 to 0-1
-            const brightnessControlEntity = document.getElementById('brightness-control-entity');
-            const opacityValue = document.getElementById('opacity').value / 10;
-            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${value}; opacity: ${opacityValue}`);
-        });
+        // Throttle function to limit update frequency (16ms ≈ 60fps)
+        function throttle(fn, wait) {
+            let lastTime = 0;
+            return function(...args) {
+                const now = Date.now();
+                if (now - lastTime >= wait) {
+                    lastTime = now;
+                    fn.apply(this, args);
+                }
+            };
+        }
 
-        document.getElementById('opacity').addEventListener('input', function(e) {
-            const value = e.target.value / 10; // Convert 0-10 to 0-1
-            const brightnessControlEntity = document.getElementById('brightness-control-entity');
-            const brightnessValue = document.getElementById('brightness').value / 10;
-            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${brightnessValue}; opacity: ${value}`);
-        });
+        // Set up brightness and opacity sliders with throttling
+        const brightnessControlEntity = document.getElementById('brightness-control-entity');
+
+        const updateBrightness = throttle(function() {
+            const brightness = document.getElementById('brightness').value / 10;
+            const opacity = document.getElementById('opacity').value / 10;
+            brightnessControlEntity.setAttribute('brightness-control', `brightness: ${brightness}; opacity: ${opacity}`);
+        }, 16);
+
+        document.getElementById('brightness').addEventListener('input', updateBrightness);
+        document.getElementById('opacity').addEventListener('input', updateBrightness);
 
         AFRAME.registerComponent('smooth-look-controls', {
             schema: {

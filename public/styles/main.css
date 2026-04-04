@@ -1,0 +1,109 @@
+/* ========================================
+   DRONE ORCHESTRA - MAIN STYLESHEET
+   Dark Brutalist Aesthetic
+   Red/Orange Color Scheme
+   ======================================== */
+
+/* ---- BASE STYLES ---- */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+}
+
+/* ---- INTRO OVERLAY ---- */
+#intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#title {
+    font-size: 80px;
+    font-weight: bold;
+    color: #FFF;
+    margin-bottom: 60px;
+    text-align: center;
+    letter-spacing: 10px;
+}
+
+/* ---- BUTTONS ---- */
+#startButton {
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #330000;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#startButton:hover {
+    background-color: #990000;
+    transform: scale(1.05);
+}
+
+/* ---- CONTROLS PANEL ---- */
+#controls {
+    color: white;
+    margin-top: 40px;
+    text-align: center;
+    max-width: 600px;
+    line-height: 1.6;
+}
+
+/* ---- BRIGHTNESS CONTROLS ---- */
+#brightness-controls {
+    position: absolute;
+    z-index: 9998;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    display: none;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.slider-container label {
+    margin-right: 10px;
+    width: 100px;
+}
+
+input[type="range"] {
+    width: 150px;
+}
+
+/* ---- A-FRAME OVERRIDES ---- */
+.a-loader-title {
+    background-color: #000 !important;
+    color: #666 !important;
+}
+
+.a-enter-vr-button,
+.a-enter-ar-button {
+    background-color: #222 !important;
+}
+
+a-scene .a-loader {
+    background-color: #000 !important;
+}
+
+.a-canvas {
+    background-color: #000 !important;
+}
