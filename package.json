@@ -1,30 +1,35 @@
 {
-  "name": "glitch-hello-node",
-  "version": "0.1.0",
-  "description": "A simple Node app built on fastify, instantly up and running. Built to be remixed on Glitch.com.",
+  "name": "drone-orchestra-explorer",
+  "version": "1.0.0",
+  "description": "An immersive 3D audio-visual experience with orbiting drone entities and spatial audio",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "sync": "node scripts/sync-drones.js"
   },
   "dependencies": {
-    "@fastify/formbody": "^7.4.0",
+    "@aws-sdk/client-s3": "^3.600.0",
     "@fastify/static": "^6.10.2",
     "@fastify/view": "^8.0.0",
-    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
     "fastify": "^4.21.0",
-    "fastify-reply-from": "^6.7.0",
-    "handlebars": "^4.7.8",
-    "unzipper": "^0.10.14"
+    "googleapis": "^140.0.0",
+    "handlebars": "^4.7.8"
   },
+  "devDependencies": {},
   "engines": {
-    "node": "14.x"
+    "node": ">=18.x"
   },
   "repository": {
-    "url": "https://glitch.com/edit/#!/glitch-hello-node"
+    "url": "https://github.com/ellinglien/drone-orchestra-explorer"
   },
   "license": "MIT",
   "keywords": [
-    "node",
-    "glitch"
+    "aframe",
+    "webgl",
+    "3d",
+    "audio",
+    "drone",
+    "spatial-audio"
   ]
 }
