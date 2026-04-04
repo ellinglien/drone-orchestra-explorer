@@ -1,0 +1,49 @@
+{
+  "generated": "2026-04-04T19:12:56.833Z",
+  "months": [
+    {
+      "id": "2026-04",
+      "name": "April 2026",
+      "theme": "April",
+      "droneCount": 0,
+      "drones": []
+    },
+    {
+      "id": "2026-03",
+      "name": "March 2026",
+      "theme": "March",
+      "droneCount": 3,
+      "drones": [
+        {
+          "artist": "20260309",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-03/20260309-rem-drone-orchestra-metamere-acid-drone.mp3",
+          "originalFilename": "20260309 - REM Drone Orchestra - Metamere - Acid Drone.wav"
+        },
+        {
+          "artist": "20260309",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-03/20260309-rem-drone-orchestra-mikey-hogan-acid-drone.mp3",
+          "originalFilename": "20260309 - REM Drone Orchestra - Mikey Hogan - Acid Drone.wav"
+        },
+        {
+          "artist": "20260325",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-03/20260325-rem-drone-orchestra-david-x-macinna-dronedinacid.mp3",
+          "originalFilename": "20260325 - REM Drone Orchestra - David X MacInna - DronedinAcid.wav"
+        }
+      ]
+    },
+    {
+      "id": "2026-02",
+      "name": "February 2026",
+      "theme": "February",
+      "droneCount": 0,
+      "drones": []
+    },
+    {
+      "id": "2026-01",
+      "name": "January 2026",
+      "theme": "January",
+      "droneCount": 0,
+      "drones": []
+    }
+  ]
+}
