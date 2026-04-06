@@ -11,7 +11,7 @@
 An immersive 3D audio-visual web experience for browsing the Drone Orchestra community archive. Users select a month from a timeline, then enter a spatial audio environment where each orbiting entity represents one community member's drone submission.
 
 **Live Experience Flow:**
-1. User visits `drones.rpmchallenge.com` (future subdomain)
+1. User visits `drone.rpmchallenge.com` (future subdomain)
 2. Dark overlay appears with chronological month list
 3. User clicks "March 2026 - Theme: Chaos"
 4. Month selector fades away
@@ -238,7 +238,7 @@ DO_SPACES_REGION               # nyc3
    - Build Command: `npm run build`
    - Output Directory: `public`
 5. Deploy
-6. Add custom domain: `drones.rpmchallenge.com`
+6. Add custom domain: `drone.rpmchallenge.com`
 
 **DNS Configuration for Subdomain:**
 ```
@@ -265,14 +265,14 @@ TTL:   Auto
 ### Option 1: Subdomain (Recommended)
 
 **Setup:**
-- Deploy as `drones.rpmchallenge.com`
+- Deploy as `drone.rpmchallenge.com`
 - Add link in RPM site navigation
 - Completely separate application (no code integration needed)
 
 **RPM Website Changes:**
 ```html
 <!-- Add to navigation -->
-<a href="https://drones.rpmchallenge.com">Drone Orchestra Archive</a>
+<a href="https://drone.rpmchallenge.com">Drone Orchestra Archive</a>
 ```
 
 **Pros:**
@@ -458,10 +458,10 @@ This project integrates with:
 
 ## Quick Start for RPM Website Agent
 
-**Your Mission:** Add `drones.rpmchallenge.com` subdomain link to RPM website navigation
+**Your Mission:** Add `drone.rpmchallenge.com` subdomain link to RPM website navigation
 
 **You Need:**
-1. Deploy this repo to Vercel with subdomain `drones.rpmchallenge.com`
+1. Deploy this repo to Vercel with subdomain `drone.rpmchallenge.com`
 2. Configure GitHub Secrets (listed above)
 3. Test initial sync
 4. Add navigation link to RPM website

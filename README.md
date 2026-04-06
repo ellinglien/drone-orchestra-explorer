@@ -119,10 +119,10 @@ Configure these in repository settings (Settings → Secrets and variables → A
 
 ### Custom Domain
 
-To use a custom subdomain (e.g., drones.rpmchallenge.com):
+To use a custom subdomain (e.g., drone.rpmchallenge.com):
 
 1. In Vercel project settings, go to Domains
-2. Add `drones.rpmchallenge.com`
+2. Add `drone.rpmchallenge.com`
 3. Configure DNS at your domain registrar:
    - Type: CNAME
    - Name: drones

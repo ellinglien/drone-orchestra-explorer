@@ -1870,7 +1870,7 @@ Expected:
 
 **Manual steps in Vercel:**
 1. Go to project settings → Domains
-2. Add `drones.rpmchallenge.com`
+2. Add `drone.rpmchallenge.com`
 3. Add CNAME record in DNS:
    - Name: `drones`
    - Value: `cname.vercel-dns.com`

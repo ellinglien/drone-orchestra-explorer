@@ -16,7 +16,7 @@ async function buildStatic() {
 
     // Update URL for deployed version if using glitch-default
     if (seoData.url === 'glitch-default') {
-      seoData.url = 'https://drones.rpmchallenge.com';
+      seoData.url = 'https://drone.rpmchallenge.com';
     }
 
     // Generate index.html

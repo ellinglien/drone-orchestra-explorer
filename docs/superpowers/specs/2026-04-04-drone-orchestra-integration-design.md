@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-04
 **Status:** Draft
-**Deployment:** Separate Vercel project, subdomain (e.g., drones.rpmchallenge.com)
+**Deployment:** Separate Vercel project, subdomain (e.g., drone.rpmchallenge.com)
 
 ## Overview
 
@@ -194,7 +194,7 @@ drone-orchestra-explorer/
 
 **Initial Load:**
 
-1. User visits subdomain (e.g., drones.rpmchallenge.com)
+1. User visits subdomain (e.g., drone.rpmchallenge.com)
 2. Month selector overlay appears with loading state
 3. Fetches `/data/months.json`
 4. Displays chronological list (newest first)
@@ -408,7 +408,7 @@ All existing custom A-Frame components remain unchanged:
 - Output Directory: `public`
 
 **Domain:**
-- Custom subdomain: `drones.rpmchallenge.com`
+- Custom subdomain: `drone.rpmchallenge.com`
 - Or: `drone-orchestra.vercel.app` (temporary)
 
 ### GitHub Repository Settings
