@@ -1,6 +1,13 @@
 {
-  "generated": "2026-04-29T08:28:06.319Z",
+  "generated": "2026-04-30T08:30:19.923Z",
   "months": [
+    {
+      "id": "2026-05",
+      "name": "May 2026",
+      "theme": "May",
+      "droneCount": 0,
+      "drones": []
+    },
     {
       "id": "2026-04",
       "name": "April 2026",
