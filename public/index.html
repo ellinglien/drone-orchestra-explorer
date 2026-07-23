@@ -71,6 +71,78 @@
             }
         });
 
+        /**
+         * slow-look-controls
+         * -------------------
+         * Custom replacement for A-Frame's built-in `look-controls`. Purpose
+         * is to make the spatial-audio panning feel musical: sharp mouse
+         * twitches were producing sharp stereo pans because A-Frame reads
+         * raw mouse deltas at 1:1 sensitivity with no damping.
+         *
+         * MUST be registered BEFORE the <a-scene> tag — A-Frame silently
+         * skips attaching components that don't exist yet at scene init
+         * time. That's why the old smooth-look-controls (defined further
+         * down the file) never actually did anything.
+         */
+        AFRAME.registerComponent('slow-look-controls', {
+            schema: {
+                sensitivity: { type: 'number', default: 0.0012 },
+                smoothing:   { type: 'number', default: 0.82 }
+            },
+            init: function () {
+                this.targetYaw = 0;
+                this.targetPitch = 0;
+                this.currentYaw = 0;
+                this.currentPitch = 0;
+                this.pointerLocked = false;
+
+                const sceneEl = this.el.sceneEl;
+
+                // Any click OUTSIDE the UI overlays should request pointer
+                // lock. Listen on document so the click hits even before
+                // the canvas is fully mounted, and skip overlays / form
+                // elements so their own click handlers still fire.
+                document.addEventListener('click', (event) => {
+                    if (this.pointerLocked) return;
+                    const uiSelectors = [
+                        '#intro-overlay',
+                        '#month-selector-overlay',
+                        '#brightness-controls',
+                        'button', 'input', 'select', 'a'
+                    ];
+                    for (const sel of uiSelectors) {
+                        if (event.target.closest && event.target.closest(sel)) return;
+                    }
+                    const canvas = sceneEl.canvas;
+                    if (canvas && canvas.requestPointerLock) canvas.requestPointerLock();
+                });
+
+                document.addEventListener('pointerlockchange', () => {
+                    this.pointerLocked = document.pointerLockElement === sceneEl.canvas;
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!this.pointerLocked) return;
+                    this.targetYaw   -= e.movementX * this.data.sensitivity;
+                    this.targetPitch -= e.movementY * this.data.sensitivity;
+                    // Clamp to just under ±90° so we can't flip
+                    const cap = Math.PI / 2 - 0.02;
+                    this.targetPitch = Math.max(-cap, Math.min(cap, this.targetPitch));
+                });
+            },
+            tick: function (time, timeDelta) {
+                // Frame-rate independent lerp. Reference: an exponential
+                // decay toward the target where the fraction remaining
+                // after 1 frame at 60fps = smoothing. Adjust for actual dt.
+                const s = this.data.smoothing;
+                const fps60Frames = Math.max(0.5, timeDelta / (1000 / 60));
+                const factor = 1 - Math.pow(s, fps60Frames);
+                this.currentYaw   += (this.targetYaw   - this.currentYaw)   * factor;
+                this.currentPitch += (this.targetPitch - this.currentPitch) * factor;
+                this.el.object3D.rotation.set(this.currentPitch, this.currentYaw, 0, 'YXZ');
+            }
+        });
+
         AFRAME.registerComponent('brightness-control', {
             schema: {
                 brightness: {type: 'number', default: 0.5},
@@ -262,88 +334,6 @@
 
         document.getElementById('brightness').addEventListener('input', updateBrightness);
         document.getElementById('opacity').addEventListener('input', updateBrightness);
-
-        /**
-         * slow-look-controls
-         * -------------------
-         * Custom replacement for A-Frame's built-in `look-controls`. Purpose
-         * is to make the spatial-audio panning feel musical: sharp mouse
-         * twitches were producing sharp stereo pans because A-Frame reads
-         * raw mouse deltas at 1:1 sensitivity with no damping.
-         *
-         * Model: mouse input updates a TARGET yaw/pitch; on each tick the
-         * VISIBLE camera rotation eases toward the target. Two knobs:
-         *   sensitivity — scales mouse delta into radians. Lower = slower turn.
-         *   smoothing   — 0-1, how much of the gap to keep per frame. Higher
-         *                 = more sluggish + gentler. 0 would be instant
-         *                 (same as raw look-controls).
-         *
-         * Pointer lock is grabbed on canvas click, matching what the old
-         * look-controls did. Pitch is clamped ±89° so we can't flip over.
-         */
-        AFRAME.registerComponent('slow-look-controls', {
-            schema: {
-                sensitivity: { type: 'number', default: 0.0012 },
-                smoothing:   { type: 'number', default: 0.82 }
-            },
-            init: function () {
-                this.targetYaw = 0;
-                this.targetPitch = 0;
-                this.currentYaw = 0;
-                this.currentPitch = 0;
-                this.pointerLocked = false;
-
-                const sceneEl = this.el.sceneEl;
-
-                // Any click OUTSIDE the UI overlays should request pointer
-                // lock. Listen on document (bubble phase) rather than on
-                // the canvas — the canvas may not exist yet at init time,
-                // and even when it does the UI overlays sit above it and
-                // eat direct clicks. This flow: user closes intro, closes
-                // month-selector, clicks anywhere on the 3D area → locked.
-                document.addEventListener('click', (event) => {
-                    if (this.pointerLocked) return;
-                    // Don't grab the pointer when the click landed inside
-                    // an interactive overlay — those still need normal
-                    // clicks.
-                    const uiSelectors = [
-                        '#intro-overlay',
-                        '#month-selector-overlay',
-                        '#brightness-controls',
-                        'button', 'input', 'select', 'a'
-                    ];
-                    for (const sel of uiSelectors) {
-                        if (event.target.closest && event.target.closest(sel)) return;
-                    }
-                    const canvas = sceneEl.canvas;
-                    if (canvas && canvas.requestPointerLock) canvas.requestPointerLock();
-                });
-
-                document.addEventListener('pointerlockchange', () => {
-                    this.pointerLocked = document.pointerLockElement === sceneEl.canvas;
-                });
-
-                document.addEventListener('mousemove', (e) => {
-                    if (!this.pointerLocked) return;
-                    this.targetYaw   -= e.movementX * this.data.sensitivity;
-                    this.targetPitch -= e.movementY * this.data.sensitivity;
-                    // Clamp to just under ±90° so we can't flip
-                    const cap = Math.PI / 2 - 0.02;
-                    this.targetPitch = Math.max(-cap, Math.min(cap, this.targetPitch));
-                });
-            },
-            tick: function (time, timeDelta) {
-                // Frame-rate independent lerp. Reference: an exponential
-                // decay toward the target where the fraction remaining
-                // after 1 frame at 60fps = smoothing. Adjust for actual dt.
-                const s = this.data.smoothing;
-                const fps60Frames = Math.max(0.5, timeDelta / (1000 / 60));
-                const factor = 1 - Math.pow(s, fps60Frames);
-                this.currentYaw   += (this.targetYaw   - this.currentYaw)   * factor;
-                this.currentPitch += (this.targetPitch - this.currentPitch) * factor;
-                this.el.object3D.rotation.set(this.currentPitch, this.currentYaw, 0, 'YXZ');
-            }
-        });
 
         // Initialize Drone Scene Controller and Month Selector on page load
         document.addEventListener('DOMContentLoaded', function() {
