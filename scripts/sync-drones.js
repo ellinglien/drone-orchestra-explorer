@@ -68,6 +68,10 @@ async function syncDroneOrchestra() {
 
   // Same default the SpacesClient falls back to — kept in sync so the URL
   // repair in loadExistingDrones() matches what fresh uploads will use.
+  // DEBUG: prove parseMonthFolder is the fixed version at runtime
+  const _p = parseMonthFolder('2026-06 June');
+  console.log(`[debug] parse('2026-06 June') = ${JSON.stringify(_p)}`);
+
   const cdnEndpointForRepair = (process.env.DO_SPACES_CDN_ENDPOINT || 'https://rpm3.nyc3.cdn.digitaloceanspaces.com').replace(/\/$/, '');
   const existing = await loadExistingDrones(cdnEndpointForRepair);
   console.log(`Loaded ${existing.byId.size} cached drones (+ ${existing.byFilename.size - existing.byId.size} filename-fallback) from months.json`);
