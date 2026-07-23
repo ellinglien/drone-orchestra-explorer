@@ -1,40 +1,200 @@
 {
-  "generated": "2026-07-23T08:39:13.849Z",
+  "generated": "2026-07-23T11:30:39.007Z",
   "months": [
     {
       "id": "2026-06",
       "name": "June 2026",
       "theme": "June",
-      "droneCount": 0,
-      "drones": []
+      "droneCount": 8,
+      "drones": [
+        {
+          "artist": "20260618",
+          "url": "/drone-orchestra/2026-06/20260618-rem-drone-orchestra-kevin-craig-drum-drone.mp3",
+          "originalFilename": "20260618 - REM Drone Orchestra - Kevin Craig - Drum Drone.wav"
+        },
+        {
+          "artist": "20260625",
+          "url": "/drone-orchestra/2026-06/20260625-kevin-craig-dryome-bd-and-toms-only.mp3",
+          "originalFilename": "20260625 - Kevin Craig - Dryome - BD and Toms Only.wav"
+        },
+        {
+          "artist": "AMUC-drome June 2026 (final-wetter)",
+          "url": "/drone-orchestra/2026-06/amuc-drome-june-2026-final-wetter.mp3",
+          "originalFilename": "AMUC-drome June 2026 (final-wetter).wav"
+        },
+        {
+          "artist": "DO CS June 2026",
+          "url": "/drone-orchestra/2026-06/do-cs-june-2026-1.mp3",
+          "originalFilename": "DO CS June 2026_1.wav"
+        },
+        {
+          "artist": "DXMacKinna",
+          "url": "/drone-orchestra/2026-06/dxmackinna-djoon-djrum-djrone.mp3",
+          "originalFilename": "DXMacKinna - Djoon Djrum Djrone.wav"
+        },
+        {
+          "artist": "HogardJune26dronedrumtime",
+          "url": "/drone-orchestra/2026-06/hogardjune26dronedrumtime.mp3",
+          "originalFilename": "HogardJune26dronedrumtime.wav"
+        },
+        {
+          "artist": "kerning man drum drone",
+          "url": "/drone-orchestra/2026-06/kerning-man-drum-drone.mp3",
+          "originalFilename": "kerning man drum drone.wav"
+        },
+        {
+          "artist": "poloma",
+          "url": "/drone-orchestra/2026-06/poloma.mp3",
+          "originalFilename": "poloma.wav"
+        }
+      ]
     },
     {
       "id": "2026-05",
       "name": "May 2026",
       "theme": "May",
-      "droneCount": 0,
-      "drones": []
+      "droneCount": 8,
+      "drones": [
+        {
+          "artist": "20260524",
+          "url": "/drone-orchestra/2026-05/20260524-rem-drone-orchestra-kevin-craig-neglected-tape-loops.mp3",
+          "originalFilename": "20260524 - REM Drone Orchestra - Kevin Craig - Neglected Tape Loops.wav"
+        },
+        {
+          "artist": "20260525",
+          "url": "/drone-orchestra/2026-05/20260525-d-x-macinna-neglected-weather-report.mp3",
+          "originalFilename": "20260525 - D X MacInna - Neglected Weather Report.wav"
+        },
+        {
+          "artist": "AMUC Neglected Harmonica Drone",
+          "url": "/drone-orchestra/2026-05/amuc-neglected-harmonica-drone-may-2026.mp3",
+          "originalFilename": "AMUC Neglected Harmonica Drone - May 2026.wav"
+        },
+        {
+          "artist": "CS DRONE May 2026",
+          "url": "/drone-orchestra/2026-05/cs-drone-may-2026.mp3",
+          "originalFilename": "CS DRONE May 2026.wav"
+        },
+        {
+          "artist": "DO May 26 Neglect eBow",
+          "url": "/drone-orchestra/2026-05/do-may-26-neglect-ebow-mikey-hogan.mp3",
+          "originalFilename": "DO May 26 Neglect eBow - Mikey Hogan.wav"
+        },
+        {
+          "artist": "dronemay",
+          "url": "/drone-orchestra/2026-05/dronemay-neglected-acoustic-gtr-andy-noise-compliment.mp3",
+          "originalFilename": "dronemay_neglected_acoustic_gtr_andy_noise_compliment.wav"
+        },
+        {
+          "artist": "DroneOrchMay26-Hogard-hang",
+          "url": "/drone-orchestra/2026-05/droneorchmay26-hogard-hang.mp3",
+          "originalFilename": "DroneOrchMay26-Hogard-hang.wav"
+        },
+        {
+          "artist": "REM Drone Orchestra 2026-05",
+          "url": "/drone-orchestra/2026-05/rem-drone-orchestra-2026-05-metamere-neglected.mp3",
+          "originalFilename": "REM Drone Orchestra 2026-05 - Metamere - Neglected.wav"
+        }
+      ]
     },
     {
       "id": "2026-04",
       "name": "April 2026",
       "theme": "April",
-      "droneCount": 0,
-      "drones": []
+      "droneCount": 7,
+      "drones": [
+        {
+          "artist": "20260325",
+          "url": "/drone-orchestra/2026-04/20260325-rem-drone-orchestra-david-x-macinna-a-horse-a-mist-a-mountain-and-a-bear.mp3",
+          "originalFilename": "20260325 - REM Drone Orchestra - David X MacInna - a horse a mist a mountain and a bear.wav"
+        },
+        {
+          "artist": "20260419",
+          "url": "/drone-orchestra/2026-04/20260419-rem-drone-orchestra-kevin-craig-fog-half-speed.mp3",
+          "originalFilename": "20260419 - REM Drone Orchestra - Kevin Craig - Fog - half speed.wav"
+        },
+        {
+          "artist": "20260424",
+          "url": "/drone-orchestra/2026-04/20260424-rem-drone-orchestra-amuc-misty-spirits.mp3",
+          "originalFilename": "20260424 - REM Drone Orchestra - AMUC - misty spirits.wav"
+        },
+        {
+          "artist": "20260425",
+          "url": "/drone-orchestra/2026-04/20260425-rem-drone-orchestra-metamere-misty-mountain-meadow.mp3",
+          "originalFilename": "20260425 - REM Drone Orchestra - Metamere - Misty Mountain Meadow.wav"
+        },
+        {
+          "artist": "26AprDO-Hogard-foundinfogcollision",
+          "url": "/drone-orchestra/2026-04/26aprdo-hogard-foundinfogcollision.mp3",
+          "originalFilename": "26AprDO-Hogard-foundinfogcollision.wav"
+        },
+        {
+          "artist": "DO Apr 26 Mikey-Mist",
+          "url": "/drone-orchestra/2026-04/do-apr-26-mikey-mist.mp3",
+          "originalFilename": "DO Apr 26 Mikey-Mist.wav"
+        },
+        {
+          "artist": "kerning man mist drone",
+          "url": "/drone-orchestra/2026-04/kerning-man-mist-drone.mp3",
+          "originalFilename": "kerning man mist drone.wav"
+        }
+      ]
     },
     {
       "id": "2026-03",
       "name": "March 2026",
       "theme": "March",
-      "droneCount": 0,
-      "drones": []
+      "droneCount": 7,
+      "drones": [
+        {
+          "artist": "20260309",
+          "url": "/drone-orchestra/2026-03/20260309-rem-drone-orchestra-metamere-acid-drone.mp3",
+          "originalFilename": "20260309 - REM Drone Orchestra - Metamere - Acid Drone.wav"
+        },
+        {
+          "artist": "20260309",
+          "url": "/drone-orchestra/2026-03/20260309-rem-drone-orchestra-mikey-hogan-acid-drone.mp3",
+          "originalFilename": "20260309 - REM Drone Orchestra - Mikey Hogan - Acid Drone.wav"
+        },
+        {
+          "artist": "20260325",
+          "url": "/drone-orchestra/2026-03/20260325-rem-drone-orchestra-david-x-macinna-dronedinacid.mp3",
+          "originalFilename": "20260325 - REM Drone Orchestra - David X MacInna - DronedinAcid.wav"
+        },
+        {
+          "artist": "20260327",
+          "url": "/drone-orchestra/2026-03/20260327-rem-drone-orchestra-kevin-craig-303-drone.mp3",
+          "originalFilename": "20260327 - REM Drone Orchestra - Kevin Craig - 303_Drone.wav"
+        },
+        {
+          "artist": "AMUC March Drone 2026 (Phase Two)",
+          "url": "/drone-orchestra/2026-03/amuc-march-drone-2026-phase-two.mp3",
+          "originalFilename": "AMUC March Drone 2026 (Phase Two).wav"
+        },
+        {
+          "artist": "Coyote Senate DO March",
+          "url": "/drone-orchestra/2026-03/coyote-senate-do-march-aux-1-st.mp3",
+          "originalFilename": "Coyote Senate DO March_Aux 1-St.wav"
+        },
+        {
+          "artist": "kerning man acid drone",
+          "url": "/drone-orchestra/2026-03/kerning-man-acid-drone.mp3",
+          "originalFilename": "kerning man acid drone.wav"
+        }
+      ]
     },
     {
       "id": "2026-02",
       "name": "February 2026",
       "theme": "February",
-      "droneCount": 0,
-      "drones": []
+      "droneCount": 1,
+      "drones": [
+        {
+          "artist": "2026february-Poloma",
+          "url": "/drone-orchestra/2026-02/2026february-poloma.mp3",
+          "originalFilename": "2026february-Poloma.wav"
+        }
+      ]
     },
     {
       "id": "2026-01",
