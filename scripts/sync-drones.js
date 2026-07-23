@@ -7,8 +7,40 @@ const path = require('path');
 const os = require('os');
 require('dotenv').config({ path: '.env.local' });
 
+/**
+ * Load the previous sync's months.json and build a lookup of Drive file IDs
+ * we've already uploaded to Spaces. Lets us skip download+convert+upload
+ * for anything we've seen before — critical because Google Drive throws
+ * captcha/abuse 403s at API-key downloads once we've pulled enough large
+ * binary files in a short window, and no amount of backoff clears that.
+ */
+async function loadExistingDrones() {
+  const outputPath = path.join(__dirname, '..', 'public', 'data', 'months.json');
+  try {
+    const raw = await fs.readFile(outputPath, 'utf8');
+    const data = JSON.parse(raw);
+    const byId = new Map();
+    // Filename fallback so the first run after adopting incremental sync
+    // can match drones written by the pre-driveFileId code path.
+    const byFilename = new Map();
+    for (const month of data.months || []) {
+      for (const drone of month.drones || []) {
+        if (!drone.url) continue;
+        if (drone.driveFileId) byId.set(drone.driveFileId, drone);
+        if (drone.originalFilename) byFilename.set(drone.originalFilename, drone);
+      }
+    }
+    return { byId, byFilename };
+  } catch {
+    return { byId: new Map(), byFilename: new Map() };
+  }
+}
+
 async function syncDroneOrchestra() {
   console.log('🎵 Drone Orchestra Sync Starting...\n');
+
+  const existing = await loadExistingDrones();
+  console.log(`Loaded ${existing.byId.size} cached drones (+ ${existing.byFilename.size - existing.byId.size} filename-fallback) from months.json`);
 
   // 1. Verify FFmpeg is available
   console.log('Checking FFmpeg availability...');
@@ -78,6 +110,17 @@ async function syncDroneOrchestra() {
     const drones = [];
 
     for (const file of filesToProcess) {
+      // Incremental: skip if we've already uploaded this exact Drive file.
+      // Try Drive file id first (stable across renames), fall back to
+      // original filename so first-run-after-upgrade can retrofit ids
+      // onto the existing months.json without re-downloading everything.
+      const cached = existing.byId.get(file.id) || existing.byFilename.get(file.name);
+      if (cached) {
+        console.log(`  ↺ Cached: ${file.name}`);
+        drones.push({ ...cached, driveFileId: file.id });
+        continue;
+      }
+
       try {
         console.log(`  Processing: ${file.name}`);
 
@@ -108,8 +151,10 @@ async function syncDroneOrchestra() {
           const remotePath = `drone-orchestra/${monthData.id}/${mp3Filename}`;
           const cdnUrl = await spacesClient.uploadFile(tempOutputPath, remotePath);
 
-          // Add to drones array
+          // Add to drones array. driveFileId is what lets us skip this
+          // file on the next sync.
           drones.push({
+            driveFileId: file.id,
             artist: artistName,
             url: cdnUrl,
             originalFilename: file.name
