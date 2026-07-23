@@ -16,9 +16,13 @@
         AFRAME.registerComponent('flight-controls', {
             schema: {
                 speed: {type: 'number', default: 10},
-                acceleration: {type: 'number', default: 35},
-                easing: {type: 'number', default: 0.5}, // This controls the 'inertia' or 'momentum'
-                friction: {type: 'number', default: 0.08} // Lower = more drift/momentum
+                // Reduced from 35 → 12 for smoother WASD onset. Movement
+                // change is gradual, which reads as musical rather than
+                // lurching. Combined with the higher friction below, the
+                // camera glides into and out of motion.
+                acceleration: {type: 'number', default: 12},
+                easing: {type: 'number', default: 0.5},
+                friction: {type: 'number', default: 0.05}
             },
             init: function() {
                 this.velocity = new THREE.Vector3(0, 0, 0);
@@ -190,8 +194,11 @@
         <a-entity light="type: point; color: #ff2200; intensity: 1.0; distance: 50; decay: 2" position="0 5 -5"></a-entity>
         <a-entity light="type: point; color: #ff1100; intensity: 0.6; distance: 40; decay: 2" position="-10 -3 -8"></a-entity>
 
-        <!-- Camera with movement controls and attached light -->
-        <a-entity camera look-controls="pointerLockEnabled: true; touchEnabled: false; magicWindowTrackingEnabled: false; mouseEnabled: true; reverseMouseDrag: false" flight-controls position="0 1.6 0">
+        <!-- Camera with movement controls and attached light.
+             slow-look-controls is a custom pointer-lock mouse-look
+             replacement — reduced sensitivity + rotation damping so
+             spatial audio pans don't jerk on sharp mouse motion. -->
+        <a-entity camera slow-look-controls flight-controls position="0 1.6 0">
             <a-entity light="type: point; color: #ff3311; intensity: 0.4; distance: 20; decay: 2"></a-entity>
         </a-entity>
 
@@ -256,29 +263,68 @@
         document.getElementById('brightness').addEventListener('input', updateBrightness);
         document.getElementById('opacity').addEventListener('input', updateBrightness);
 
-        AFRAME.registerComponent('smooth-look-controls', {
+        /**
+         * slow-look-controls
+         * -------------------
+         * Custom replacement for A-Frame's built-in `look-controls`. Purpose
+         * is to make the spatial-audio panning feel musical: sharp mouse
+         * twitches were producing sharp stereo pans because A-Frame reads
+         * raw mouse deltas at 1:1 sensitivity with no damping.
+         *
+         * Model: mouse input updates a TARGET yaw/pitch; on each tick the
+         * VISIBLE camera rotation eases toward the target. Two knobs:
+         *   sensitivity — scales mouse delta into radians. Lower = slower turn.
+         *   smoothing   — 0-1, how much of the gap to keep per frame. Higher
+         *                 = more sluggish + gentler. 0 would be instant
+         *                 (same as raw look-controls).
+         *
+         * Pointer lock is grabbed on canvas click, matching what the old
+         * look-controls did. Pitch is clamped ±89° so we can't flip over.
+         */
+        AFRAME.registerComponent('slow-look-controls', {
             schema: {
-                dampingFactor: { type: 'number', default: 0.5 },
-                decayFactor: { type: 'number', default: 0.95 } // Control how quickly to reduce follow-through
+                sensitivity: { type: 'number', default: 0.0012 },
+                smoothing:   { type: 'number', default: 0.82 }
             },
             init: function () {
-                this.targetRotation = new THREE.Quaternion();
-                this.currentRotation = new THREE.Quaternion();
-                this.decay = 1.0; // Start with no reduction in damping
+                this.targetYaw = 0;
+                this.targetPitch = 0;
+                this.currentYaw = 0;
+                this.currentPitch = 0;
+                this.pointerLocked = false;
+
+                const sceneEl = this.el.sceneEl;
+                const requestLock = () => {
+                    const canvas = sceneEl.canvas;
+                    if (canvas && !this.pointerLocked) canvas.requestPointerLock();
+                };
+                sceneEl.addEventListener('loaded', () => {
+                    if (sceneEl.canvas) sceneEl.canvas.addEventListener('click', requestLock);
+                });
+
+                document.addEventListener('pointerlockchange', () => {
+                    this.pointerLocked = document.pointerLockElement === sceneEl.canvas;
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!this.pointerLocked) return;
+                    this.targetYaw   -= e.movementX * this.data.sensitivity;
+                    this.targetPitch -= e.movementY * this.data.sensitivity;
+                    // Clamp to just under ±90° so we can't flip
+                    const cap = Math.PI / 2 - 0.02;
+                    this.targetPitch = Math.max(-cap, Math.min(cap, this.targetPitch));
+                });
             },
             tick: function (time, timeDelta) {
-                var data = this.data;
-                var obj3D = this.el.object3D;
-                var delta = (timeDelta / 1000) * data.dampingFactor * this.decay; // Apply decay to damping
-
-                // Update decay factor, reducing the damping effect over time
-                this.decay *= data.decayFactor;
-                this.decay = Math.max(this.decay, 0.1); // Ensure decay does not reduce damping below a minimum threshold
-
-                // Convert current and target to Quaternion to use slerp for smoothing
-                this.targetRotation.copy(obj3D.quaternion);
-                this.currentRotation.slerp(this.targetRotation, delta); // Spherical linear interpolation
-                obj3D.quaternion.copy(this.currentRotation);
+                // Frame-rate independent lerp. Reference: an exponential
+                // decay toward the target where the fraction remaining
+                // after 1 frame at 60fps = smoothing. Adjust for actual dt.
+                const s = this.data.smoothing;
+                const fps60Frames = Math.max(0.5, timeDelta / (1000 / 60));
+                const factor = 1 - Math.pow(s, fps60Frames);
+                this.currentYaw   += (this.targetYaw   - this.currentYaw)   * factor;
+                this.currentPitch += (this.targetPitch - this.currentPitch) * factor;
+                this.el.object3D.rotation.set(this.currentPitch, this.currentYaw, 0, 'YXZ');
             }
         });
 
