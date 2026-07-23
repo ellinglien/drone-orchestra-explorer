@@ -64,7 +64,14 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add public/data/months.json
           git commit -m "chore: update drone orchestra metadata [skip ci]"
-          git push
+          # Rebase+push with retries — the sync runs on a schedule AND
+          # a human might push at any time. Without this loop, a race
+          # loses the sync's generated months.json entirely.
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && break
+            echo "push failed, retry $attempt/5"
+            sleep $((attempt * 3))
+          done
 
       - name: Create workflow summary
         if: always()

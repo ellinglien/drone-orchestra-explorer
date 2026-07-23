@@ -36,11 +36,21 @@ async function loadExistingDrones() {
   }
 }
 
+// Google Drive returns an unrecoverable captcha/abuse 403 after ~30 large
+// binary downloads from the same IP in a short window. Cap NEW downloads
+// per run so we never trip that threshold. Cached files skip the download
+// path entirely, so this only limits FIRST-time processing — in steady
+// state each daily run does 0-few real downloads. Leftover new files
+// carry over to the next run.
+const MAX_NEW_DOWNLOADS_PER_RUN = 15;
+
 async function syncDroneOrchestra() {
   console.log('🎵 Drone Orchestra Sync Starting...\n');
 
   const existing = await loadExistingDrones();
   console.log(`Loaded ${existing.byId.size} cached drones (+ ${existing.byFilename.size - existing.byId.size} filename-fallback) from months.json`);
+
+  let newDownloadsThisRun = 0;
 
   // 1. Verify FFmpeg is available
   console.log('Checking FFmpeg availability...');
@@ -121,6 +131,12 @@ async function syncDroneOrchestra() {
         continue;
       }
 
+      // Cap NEW downloads to avoid Drive's captcha/abuse threshold.
+      if (newDownloadsThisRun >= MAX_NEW_DOWNLOADS_PER_RUN) {
+        console.log(`  ⏭ Skipping (per-run cap of ${MAX_NEW_DOWNLOADS_PER_RUN} new downloads reached): ${file.name}`);
+        continue;
+      }
+
       try {
         console.log(`  Processing: ${file.name}`);
 
@@ -159,6 +175,7 @@ async function syncDroneOrchestra() {
             url: cdnUrl,
             originalFilename: file.name
           });
+          newDownloadsThisRun++;
 
           console.log(`    ✓ ${artistName} - ${cdnUrl}`);
         } finally {
