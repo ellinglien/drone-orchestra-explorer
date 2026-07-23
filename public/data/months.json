@@ -1,10 +1,10 @@
 {
-  "generated": "2026-07-23T13:05:30.384Z",
+  "generated": "2026-07-23T13:17:07.821Z",
   "months": [
     {
       "id": "2026-06",
       "name": "June 2026",
-      "theme": "June",
+      "theme": null,
       "droneCount": 8,
       "drones": [
         {
@@ -60,7 +60,7 @@
     {
       "id": "2026-05",
       "name": "May 2026",
-      "theme": "May",
+      "theme": null,
       "droneCount": 8,
       "drones": [
         {
@@ -116,7 +116,7 @@
     {
       "id": "2026-04",
       "name": "April 2026",
-      "theme": "April",
+      "theme": null,
       "droneCount": 7,
       "drones": [
         {
@@ -166,7 +166,7 @@
     {
       "id": "2026-03",
       "name": "March 2026",
-      "theme": "March",
+      "theme": null,
       "droneCount": 7,
       "drones": [
         {
@@ -216,7 +216,7 @@
     {
       "id": "2026-02",
       "name": "February 2026",
-      "theme": "February",
+      "theme": null,
       "droneCount": 8,
       "drones": [
         {
@@ -272,7 +272,7 @@
     {
       "id": "2026-01",
       "name": "January 2026",
-      "theme": "January",
+      "theme": null,
       "droneCount": 6,
       "drones": [
         {
