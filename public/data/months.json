@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-23T11:30:39.007Z",
+  "generated": "2026-07-23T12:00:10.939Z",
   "months": [
     {
       "id": "2026-06",
@@ -187,14 +187,8 @@
       "id": "2026-02",
       "name": "February 2026",
       "theme": "February",
-      "droneCount": 1,
-      "drones": [
-        {
-          "artist": "2026february-Poloma",
-          "url": "/drone-orchestra/2026-02/2026february-poloma.mp3",
-          "originalFilename": "2026february-Poloma.wav"
-        }
-      ]
+      "droneCount": 0,
+      "drones": []
     },
     {
       "id": "2026-01",
