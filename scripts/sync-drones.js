@@ -14,7 +14,19 @@ require('dotenv').config({ path: '.env.local' });
  * captcha/abuse 403s at API-key downloads once we've pulled enough large
  * binary files in a short window, and no amount of backoff clears that.
  */
-async function loadExistingDrones() {
+/** Fix up a cached drone URL: earlier syncs shipped with an empty
+ *  DO_SPACES_CDN_ENDPOINT env var, so the stored `url` is a bare path
+ *  (/drone-orchestra/...). Prepend the CDN base so the browser can
+ *  actually fetch the audio. */
+function repairUrl(url, cdnEndpoint) {
+  if (!url) return url;
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = (cdnEndpoint || '').replace(/\/$/, '');
+  const path = url.startsWith('/') ? url : '/' + url;
+  return base + path;
+}
+
+async function loadExistingDrones(cdnEndpoint) {
   const outputPath = path.join(__dirname, '..', 'public', 'data', 'months.json');
   try {
     const raw = await fs.readFile(outputPath, 'utf8');
@@ -23,13 +35,20 @@ async function loadExistingDrones() {
     // Filename fallback so the first run after adopting incremental sync
     // can match drones written by the pre-driveFileId code path.
     const byFilename = new Map();
+    let repaired = 0;
     for (const month of data.months || []) {
       for (const drone of month.drones || []) {
         if (!drone.url) continue;
+        const fixedUrl = repairUrl(drone.url, cdnEndpoint);
+        if (fixedUrl !== drone.url) {
+          repaired++;
+          drone.url = fixedUrl;
+        }
         if (drone.driveFileId) byId.set(drone.driveFileId, drone);
         if (drone.originalFilename) byFilename.set(drone.originalFilename, drone);
       }
     }
+    if (repaired) console.log(`Repaired ${repaired} relative URLs → absolute`);
     return { byId, byFilename };
   } catch {
     return { byId: new Map(), byFilename: new Map() };
@@ -47,7 +66,10 @@ const MAX_NEW_DOWNLOADS_PER_RUN = 15;
 async function syncDroneOrchestra() {
   console.log('🎵 Drone Orchestra Sync Starting...\n');
 
-  const existing = await loadExistingDrones();
+  // Same default the SpacesClient falls back to — kept in sync so the URL
+  // repair in loadExistingDrones() matches what fresh uploads will use.
+  const cdnEndpointForRepair = (process.env.DO_SPACES_CDN_ENDPOINT || 'https://rpm3.nyc3.cdn.digitaloceanspaces.com').replace(/\/$/, '');
+  const existing = await loadExistingDrones(cdnEndpointForRepair);
   console.log(`Loaded ${existing.byId.size} cached drones (+ ${existing.byFilename.size - existing.byId.size} filename-fallback) from months.json`);
 
   let newDownloadsThisRun = 0;
