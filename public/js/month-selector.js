@@ -43,7 +43,7 @@ class MonthSelector {
     this.overlay.id = 'month-selector-overlay';
     this.overlay.innerHTML = `
       <div class="month-selector-content">
-        <h1>Drone Orchestra Archive</h1>
+        <h1>Drone Orchestra Explorer</h1>
         <p class="subtitle">Select a month to explore</p>
         <div id="months-list" class="months-list"></div>
       </div>
