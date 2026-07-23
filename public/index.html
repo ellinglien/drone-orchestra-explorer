@@ -294,12 +294,29 @@
                 this.pointerLocked = false;
 
                 const sceneEl = this.el.sceneEl;
-                const requestLock = () => {
+
+                // Any click OUTSIDE the UI overlays should request pointer
+                // lock. Listen on document (bubble phase) rather than on
+                // the canvas — the canvas may not exist yet at init time,
+                // and even when it does the UI overlays sit above it and
+                // eat direct clicks. This flow: user closes intro, closes
+                // month-selector, clicks anywhere on the 3D area → locked.
+                document.addEventListener('click', (event) => {
+                    if (this.pointerLocked) return;
+                    // Don't grab the pointer when the click landed inside
+                    // an interactive overlay — those still need normal
+                    // clicks.
+                    const uiSelectors = [
+                        '#intro-overlay',
+                        '#month-selector-overlay',
+                        '#brightness-controls',
+                        'button', 'input', 'select', 'a'
+                    ];
+                    for (const sel of uiSelectors) {
+                        if (event.target.closest && event.target.closest(sel)) return;
+                    }
                     const canvas = sceneEl.canvas;
-                    if (canvas && !this.pointerLocked) canvas.requestPointerLock();
-                };
-                sceneEl.addEventListener('loaded', () => {
-                    if (sceneEl.canvas) sceneEl.canvas.addEventListener('click', requestLock);
+                    if (canvas && canvas.requestPointerLock) canvas.requestPointerLock();
                 });
 
                 document.addEventListener('pointerlockchange', () => {
