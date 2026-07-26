@@ -1,6 +1,20 @@
 {
-  "generated": "2026-07-25T08:10:01.492Z",
+  "generated": "2026-07-26T08:29:48.311Z",
   "months": [
+    {
+      "id": "2026-07",
+      "name": "July 2026",
+      "theme": null,
+      "droneCount": 1,
+      "drones": [
+        {
+          "driveFileId": "1KB7Uuvimdq5dzldbtF_2A5fvopGhb9ut",
+          "artist": "HogardJuly26DroneDoug",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-07/hogardjuly26dronedoug.mp3",
+          "originalFilename": "HogardJuly26DroneDoug.wav"
+        }
+      ]
+    },
     {
       "id": "2026-06",
       "name": "June 2026",
