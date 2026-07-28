@@ -1,17 +1,23 @@
 {
-  "generated": "2026-07-27T09:56:18.386Z",
+  "generated": "2026-07-28T08:39:43.226Z",
   "months": [
     {
       "id": "2026-07",
       "name": "July 2026",
       "theme": null,
-      "droneCount": 1,
+      "droneCount": 2,
       "drones": [
         {
           "driveFileId": "1KB7Uuvimdq5dzldbtF_2A5fvopGhb9ut",
           "artist": "HogardJuly26DroneDoug",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-07/hogardjuly26dronedoug.mp3",
           "originalFilename": "HogardJuly26DroneDoug.wav"
+        },
+        {
+          "driveFileId": "1-v22AiHRpdYKlwMTU2xmnxoS6GNYWPH1",
+          "artist": "Kevyspice",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-07/kevyspice-ebaug-hexatonic.mp3",
+          "originalFilename": "Kevyspice - Ebaug_Hexatonic.wav"
         }
       ]
     },
