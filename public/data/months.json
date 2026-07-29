@@ -1,12 +1,25 @@
 {
-  "generated": "2026-07-28T08:39:43.226Z",
+  "generated": "2026-07-29T08:44:18.648Z",
   "months": [
+    {
+      "id": "2026-08",
+      "name": "August 2026",
+      "theme": null,
+      "droneCount": 0,
+      "drones": []
+    },
     {
       "id": "2026-07",
       "name": "July 2026",
       "theme": null,
-      "droneCount": 2,
+      "droneCount": 3,
       "drones": [
+        {
+          "driveFileId": "10_BpErHZarXIKn4f78OJRdyIhJbeydiY",
+          "artist": "GTR 1",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-07/gtr-1-05.mp3",
+          "originalFilename": "GTR 1_05.wav"
+        },
         {
           "driveFileId": "1KB7Uuvimdq5dzldbtF_2A5fvopGhb9ut",
           "artist": "HogardJuly26DroneDoug",
