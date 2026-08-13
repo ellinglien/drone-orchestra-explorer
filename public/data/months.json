@@ -1,12 +1,19 @@
 {
-  "generated": "2026-08-12T07:27:48.965Z",
+  "generated": "2026-08-13T07:38:21.369Z",
   "months": [
     {
       "id": "2026-08",
       "name": "August 2026",
       "theme": null,
-      "droneCount": 0,
-      "drones": []
+      "droneCount": 1,
+      "drones": [
+        {
+          "driveFileId": "1p0eBCdZSdBbu0hqav_0pYeHVI6uqHUal",
+          "artist": "Hogard",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/hogard-droneaug26tomdronesinc.mp3",
+          "originalFilename": "Hogard_droneAug26TomDronesInC.wav"
+        }
+      ]
     },
     {
       "id": "2026-07",
