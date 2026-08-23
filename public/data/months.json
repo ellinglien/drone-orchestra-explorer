@@ -1,17 +1,35 @@
 {
-  "generated": "2026-08-22T06:42:49.248Z",
+  "generated": "2026-08-23T06:44:12.537Z",
   "months": [
     {
       "id": "2026-08",
       "name": "August 2026",
       "theme": null,
-      "droneCount": 1,
+      "droneCount": 4,
       "drones": [
+        {
+          "driveFileId": "1ZjakLfkDBdW4X05xd8WP227MbjH791mG",
+          "artist": "AMUC",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/amuc-august-2026-tom-drones.mp3",
+          "originalFilename": "AMUC - August 2026 - Tom Drones.wav"
+        },
         {
           "driveFileId": "1p0eBCdZSdBbu0hqav_0pYeHVI6uqHUal",
           "artist": "Hogard",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/hogard-droneaug26tomdronesinc.mp3",
           "originalFilename": "Hogard_droneAug26TomDronesInC.wav"
+        },
+        {
+          "driveFileId": "1L3Rj5gDHFDyYMwAZQYW0MhL0q8UsEx8c",
+          "artist": "Not_Unusual_C_Drone",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/not-unusual-c-drone-kevyspice-aug2026.mp3",
+          "originalFilename": "Not_Unusual_C_Drone - Kevyspice - Aug2026.wav"
+        },
+        {
+          "driveFileId": "15QxSbWNFOHOkMm7SfMEy8Ii1K9FhmV4T",
+          "artist": "pen-tailed treeshrew August 2026 drone orchestra contribution",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/pen-tailed-treeshrew-august-2026-drone-orchestra-contribution.mp3",
+          "originalFilename": "pen-tailed treeshrew August 2026 drone orchestra contribution.wav"
         }
       ]
     },
