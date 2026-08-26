@@ -1,17 +1,29 @@
 {
-  "generated": "2026-08-25T06:52:05.872Z",
+  "generated": "2026-08-26T06:54:55.172Z",
   "months": [
     {
       "id": "2026-08",
       "name": "August 2026",
       "theme": null,
-      "droneCount": 4,
+      "droneCount": 6,
       "drones": [
         {
           "driveFileId": "1ZjakLfkDBdW4X05xd8WP227MbjH791mG",
           "artist": "AMUC",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/amuc-august-2026-tom-drones.mp3",
           "originalFilename": "AMUC - August 2026 - Tom Drones.wav"
+        },
+        {
+          "driveFileId": "1ugoPyGJFAAL_aAGa2WPCoiCXPtWzUb1u",
+          "artist": "D Xavier MacKinna",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/d-xavier-mackinna-tome-drawn.mp3",
+          "originalFilename": "D Xavier MacKinna - Tome Drawn.wav"
+        },
+        {
+          "driveFileId": "1d5zWRP-aT1R_6QZShEJ2zp4GDI4lmfpz",
+          "artist": "DO Aug 26 Tom Drones",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/do-aug-26-tom-drones-mikey-hogan.mp3",
+          "originalFilename": "DO Aug 26 Tom Drones - Mikey Hogan.wav"
         },
         {
           "driveFileId": "1p0eBCdZSdBbu0hqav_0pYeHVI6uqHUal",
