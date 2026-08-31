@@ -1,11 +1,18 @@
 {
-  "generated": "2026-08-30T11:29:43.137Z",
+  "generated": "2026-08-31T13:02:22.163Z",
   "months": [
+    {
+      "id": "2026-09",
+      "name": "September 2026",
+      "theme": null,
+      "droneCount": 0,
+      "drones": []
+    },
     {
       "id": "2026-08",
       "name": "August 2026",
       "theme": null,
-      "droneCount": 6,
+      "droneCount": 7,
       "drones": [
         {
           "driveFileId": "1ZjakLfkDBdW4X05xd8WP227MbjH791mG",
@@ -42,6 +49,12 @@
           "artist": "pen-tailed treeshrew August 2026 drone orchestra contribution",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/pen-tailed-treeshrew-august-2026-drone-orchestra-contribution.mp3",
           "originalFilename": "pen-tailed treeshrew August 2026 drone orchestra contribution.wav"
+        },
+        {
+          "driveFileId": "1EdQbNX1RyGLe1i8Sa0lA1jKL00PQghdP",
+          "artist": "Tom Drones",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-08/tom-drones-coyote-senate.mp3",
+          "originalFilename": "Tom Drones_Coyote Senate.wav"
         }
       ]
     },
