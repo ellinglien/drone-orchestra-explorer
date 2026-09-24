@@ -1,12 +1,37 @@
 {
-  "generated": "2026-09-23T11:01:00.602Z",
+  "generated": "2026-09-24T11:20:19.412Z",
   "months": [
     {
       "id": "2026-09",
       "name": "September 2026",
       "theme": null,
-      "droneCount": 0,
-      "drones": []
+      "droneCount": 4,
+      "drones": [
+        {
+          "driveFileId": "1A6g5sLLEaIu7tvcT4PIwfuz0UToF0Fn3",
+          "artist": "A_Major_Drone",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/a-major-drone-kevyspice-sept2026.mp3",
+          "originalFilename": "A_Major_Drone - Kevyspice - Sept2026.wav"
+        },
+        {
+          "driveFileId": "1uTkOywpgDRBLeDwQ2n8RVfv4uuIX1wfZ",
+          "artist": "AMUC-A-Major-Drone-Sept-2026",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/amuc-a-major-drone-sept-2026.mp3",
+          "originalFilename": "AMUC-A-Major-Drone-Sept-2026.wav"
+        },
+        {
+          "driveFileId": "1__vJvjS-fYJiWG4woUqlh5jGqpWHEA9E",
+          "artist": "D Xavier MacKinna",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/d-xavier-mackinna-a-major-team-effort.mp3",
+          "originalFilename": "D Xavier MacKinna - A Major Team Effort.wav"
+        },
+        {
+          "driveFileId": "1kgPQ_hLYBp6AqRd9ysP4Fey-8vgMZfdr",
+          "artist": "HogardSep26Liminalia",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/hogardsep26liminalia.mp3",
+          "originalFilename": "HogardSep26Liminalia.wav"
+        }
+      ]
     },
     {
       "id": "2026-08",
