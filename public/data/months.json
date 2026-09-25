@@ -1,11 +1,11 @@
 {
-  "generated": "2026-09-24T11:20:19.412Z",
+  "generated": "2026-09-25T11:25:20.179Z",
   "months": [
     {
       "id": "2026-09",
       "name": "September 2026",
       "theme": null,
-      "droneCount": 4,
+      "droneCount": 5,
       "drones": [
         {
           "driveFileId": "1A6g5sLLEaIu7tvcT4PIwfuz0UToF0Fn3",
@@ -30,6 +30,12 @@
           "artist": "HogardSep26Liminalia",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/hogardsep26liminalia.mp3",
           "originalFilename": "HogardSep26Liminalia.wav"
+        },
+        {
+          "driveFileId": "1evzUEyIH1zwQ-4U2F1ukhC8UH9GAgfDH",
+          "artist": "Mikey",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/mikey-drone-orchestra-sep-26-a-major.mp3",
+          "originalFilename": "Mikey - Drone Orchestra Sep 26 A Major.wav"
         }
       ]
     },
