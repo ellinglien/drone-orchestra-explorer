@@ -1,11 +1,11 @@
 {
-  "generated": "2026-09-27T11:39:25.046Z",
+  "generated": "2026-09-28T13:14:41.492Z",
   "months": [
     {
       "id": "2026-09",
       "name": "September 2026",
       "theme": null,
-      "droneCount": 5,
+      "droneCount": 6,
       "drones": [
         {
           "driveFileId": "1A6g5sLLEaIu7tvcT4PIwfuz0UToF0Fn3",
@@ -30,6 +30,12 @@
           "artist": "HogardSep26Liminalia",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/hogardsep26liminalia.mp3",
           "originalFilename": "HogardSep26Liminalia.wav"
+        },
+        {
+          "driveFileId": "1ZUROKE4EBJ8FGNs0R9zSjpHPb7ncD4wz",
+          "artist": "Metamere",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/metamere-a-major-drone-2026-09.mp3",
+          "originalFilename": "Metamere - A Major Drone - 2026-09.wav"
         },
         {
           "driveFileId": "1evzUEyIH1zwQ-4U2F1ukhC8UH9GAgfDH",
