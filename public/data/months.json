@@ -1,11 +1,11 @@
 {
-  "generated": "2026-09-30T12:07:39.001Z",
+  "generated": "2026-10-01T12:41:50.158Z",
   "months": [
     {
       "id": "2026-09",
       "name": "September 2026",
       "theme": null,
-      "droneCount": 6,
+      "droneCount": 8,
       "drones": [
         {
           "driveFileId": "1A6g5sLLEaIu7tvcT4PIwfuz0UToF0Fn3",
@@ -42,6 +42,18 @@
           "artist": "Mikey",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/mikey-drone-orchestra-sep-26-a-major.mp3",
           "originalFilename": "Mikey - Drone Orchestra Sep 26 A Major.wav"
+        },
+        {
+          "driveFileId": "12Ks_NhTz3QwMNq_eBi0aDQXbufoDx-nK",
+          "artist": "The Fortunate Union at The Viaduct at L'Estaque",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/the-fortunate-union-at-the-viaduct-at-l-estaque.mp3",
+          "originalFilename": "The Fortunate Union at The Viaduct at L'Estaque.mp3"
+        },
+        {
+          "driveFileId": "1tGFxPwJFNTUsNURkkyp5KgZHUL2F5DYL",
+          "artist": "The Fortunate Union at The Viaduct at L'Estaque",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-09/the-fortunate-union-at-the-viaduct-at-l-estaque.mp3",
+          "originalFilename": "The Fortunate Union at The Viaduct at L'Estaque.wav"
         }
       ]
     },
