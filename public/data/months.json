@@ -1,11 +1,11 @@
 {
-  "generated": "2026-10-25T10:57:40.004Z",
+  "generated": "2026-10-26T12:28:41.617Z",
   "months": [
     {
       "id": "2026-10",
       "name": "October 2026",
       "theme": null,
-      "droneCount": 2,
+      "droneCount": 3,
       "drones": [
         {
           "driveFileId": "1K5PV98Ae1KUi2LI_uzrSCT7TK0i7cvCt",
@@ -18,6 +18,12 @@
           "artist": "D Xavier MacKinna",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-10/d-xavier-mackinna-e-for-liminal.mp3",
           "originalFilename": "D Xavier MacKinna - E for Liminal.wav"
+        },
+        {
+          "driveFileId": "1QDL9eTD_kRDrnXO0X3nSijZiBnQAPN0J",
+          "artist": "E-Ab-C_Drone",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-10/e-ab-c-drone-kevyspice-oct2026.mp3",
+          "originalFilename": "E-Ab-C_Drone - Kevyspice - Oct2026.wav"
         }
       ]
     },
