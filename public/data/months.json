@@ -1,11 +1,11 @@
 {
-  "generated": "2026-10-28T12:20:43.344Z",
+  "generated": "2026-10-29T12:30:00.694Z",
   "months": [
     {
       "id": "2026-10",
       "name": "October 2026",
       "theme": null,
-      "droneCount": 3,
+      "droneCount": 4,
       "drones": [
         {
           "driveFileId": "1K5PV98Ae1KUi2LI_uzrSCT7TK0i7cvCt",
@@ -24,6 +24,12 @@
           "artist": "E-Ab-C_Drone",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-10/e-ab-c-drone-kevyspice-oct2026.mp3",
           "originalFilename": "E-Ab-C_Drone - Kevyspice - Oct2026.wav"
+        },
+        {
+          "driveFileId": "14L_Ijwzt4-Jdx7bER_ymg43-s3xx66RP",
+          "artist": "Metamere",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-10/metamere-liminal-drone.mp3",
+          "originalFilename": "Metamere - Liminal Drone.wav"
         }
       ]
     },
