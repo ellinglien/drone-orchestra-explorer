@@ -1,6 +1,20 @@
 {
-  "generated": "2026-11-21T14:23:52.350Z",
+  "generated": "2026-11-22T14:16:18.652Z",
   "months": [
+    {
+      "id": "2026-11",
+      "name": "November 2026",
+      "theme": null,
+      "droneCount": 1,
+      "drones": [
+        {
+          "driveFileId": "1nzZNzfrxNjdQjBJLW9dG0o965cgnWd7U",
+          "artist": "Deluge",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-11/deluge-metamere-rain-drone.mp3",
+          "originalFilename": "Deluge - Metamere - Rain Drone.wav"
+        }
+      ]
+    },
     {
       "id": "2026-10",
       "name": "October 2026",
