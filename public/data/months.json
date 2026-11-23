@@ -1,12 +1,18 @@
 {
-  "generated": "2026-11-22T14:16:18.652Z",
+  "generated": "2026-11-23T17:38:35.675Z",
   "months": [
     {
       "id": "2026-11",
       "name": "November 2026",
       "theme": null,
-      "droneCount": 1,
+      "droneCount": 2,
       "drones": [
+        {
+          "driveFileId": "1uJzH1xnzSi6sXCZELSRlobw_HzYZrUF7",
+          "artist": "AMUC Nov 2026",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-11/amuc-nov-2026-rain-drone.mp3",
+          "originalFilename": "AMUC Nov 2026 - Rain Drone.wav"
+        },
         {
           "driveFileId": "1nzZNzfrxNjdQjBJLW9dG0o965cgnWd7U",
           "artist": "Deluge",
