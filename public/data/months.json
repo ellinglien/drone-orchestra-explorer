@@ -1,11 +1,11 @@
 {
-  "generated": "2026-11-24T17:09:40.121Z",
+  "generated": "2026-11-25T16:56:18.312Z",
   "months": [
     {
       "id": "2026-11",
       "name": "November 2026",
       "theme": null,
-      "droneCount": 3,
+      "droneCount": 5,
       "drones": [
         {
           "driveFileId": "1uJzH1xnzSi6sXCZELSRlobw_HzYZrUF7",
@@ -20,10 +20,22 @@
           "originalFilename": "Deluge - Metamere - Rain Drone.wav"
         },
         {
+          "driveFileId": "1y64cA11Vi8-i0Y9ZEzdt3od-OnbYM8wH",
+          "artist": "November_Rain_Drone",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-11/november-rain-drone-kevyspice-nov2026-mix-4.mp3",
+          "originalFilename": "November_Rain_Drone - Kevyspice - Nov2026 - Mix 4.wav"
+        },
+        {
           "driveFileId": "1vm7PbsmlQK1HWFAUq7twh68tayCvVfIQ",
           "artist": "Rain Drone by Zoom Cube",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-11/rain-drone-by-zoom-cube.mp3",
           "originalFilename": "Rain Drone by Zoom Cube.m4a"
+        },
+        {
+          "driveFileId": "1sedtCLRxaj2OccM-ABMBN53mlt7AyaXR",
+          "artist": "wxodronenovember2026",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-11/wxodronenovember2026.mp3",
+          "originalFilename": "wxodronenovember2026.flac"
         }
       ]
     },
