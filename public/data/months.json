@@ -1,11 +1,11 @@
 {
-  "generated": "2026-11-27T16:20:45.815Z",
+  "generated": "2026-11-28T15:13:36.504Z",
   "months": [
     {
       "id": "2026-11",
       "name": "November 2026",
       "theme": null,
-      "droneCount": 5,
+      "droneCount": 7,
       "drones": [
         {
           "driveFileId": "1uJzH1xnzSi6sXCZELSRlobw_HzYZrUF7",
@@ -14,10 +14,22 @@
           "originalFilename": "AMUC Nov 2026 - Rain Drone.wav"
         },
         {
+          "driveFileId": "1E0UrYm4i2Qb7vakoQlAony-oj8LyrX73",
+          "artist": "D Xavier MacKinna",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-11/d-xavier-mackinna-no-vember.mp3",
+          "originalFilename": "D Xavier MacKinna - No Vember.wav"
+        },
+        {
           "driveFileId": "1nzZNzfrxNjdQjBJLW9dG0o965cgnWd7U",
           "artist": "Deluge",
           "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-11/deluge-metamere-rain-drone.mp3",
           "originalFilename": "Deluge - Metamere - Rain Drone.wav"
+        },
+        {
+          "driveFileId": "1yGH8vSEn8Z81Ws4R2m7n8Nm_NimdJIuc",
+          "artist": "kerning man rain drone",
+          "url": "https://rpm3.nyc3.cdn.digitaloceanspaces.com/drone-orchestra/2026-11/kerning-man-rain-drone.mp3",
+          "originalFilename": "kerning man rain drone .wav"
         },
         {
           "driveFileId": "1y64cA11Vi8-i0Y9ZEzdt3od-OnbYM8wH",
